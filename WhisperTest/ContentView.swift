@@ -1,59 +1,69 @@
-//
-//  ContentView.swift
-//  WhisperTest
-//
-//  Created by B.P. Emmerzaal on 21/03/2026.
-//
-
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Environment(AudioRecorderService.self) private var audioRecorder
+    @Environment(TranscriptionService.self) private var transcriptionService
+    @Environment(ModelManager.self) private var modelManager
+    @State private var selectedRecording: Recording?
+    @State private var showModelManagement = false
 
     var body: some View {
         NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
+            SidebarView(selectedRecording: $selectedRecording)
+                .navigationSplitViewColumnWidth(min: 220, ideal: 280)
         } detail: {
-            Text("Select an item")
+            if let selectedRecording {
+                RecordingDetailView(recording: selectedRecording)
+            } else if modelManager.selectedModelName == nil {
+                ContentUnavailableView {
+                    Label("No Model Selected", systemImage: "arrow.down.circle")
+                } description: {
+                    Text("Download and select a Whisper model to start transcribing.")
+                } actions: {
+                    Button("Open Model Manager") {
+                        showModelManagement = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            } else {
+                ContentUnavailableView(
+                    "Select a Recording",
+                    systemImage: "waveform",
+                    description: Text("Choose a recording from the sidebar or start a new one.")
+                )
+            }
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                RecordingControlsView()
+            }
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    showModelManagement = true
+                } label: {
+                    Label("Models", systemImage: "cpu")
+                }
+                .help("Manage Whisper models")
+            }
         }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+        .sheet(isPresented: $showModelManagement) {
+            ModelManagementView()
+                .environment(modelManager)
+                .environment(transcriptionService)
+                .frame(minWidth: 500, minHeight: 450)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            showModelManagement = false
+                        }
+                    }
+                }
+        }
+        .task {
+            if let folder = modelManager.selectedModelFolder {
+                try? await transcriptionService.loadModel(from: folder)
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

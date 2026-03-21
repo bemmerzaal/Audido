@@ -1,18 +1,15 @@
-//
-//  WhisperTestApp.swift
-//  WhisperTest
-//
-//  Created by B.P. Emmerzaal on 21/03/2026.
-//
-
 import SwiftUI
 import SwiftData
 
 @main
 struct WhisperTestApp: App {
+    @State private var audioRecorder = AudioRecorderService()
+    @State private var transcriptionService = TranscriptionService()
+    @State private var modelManager = ModelManager()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Recording.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -26,7 +23,16 @@ struct WhisperTestApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(audioRecorder)
+                .environment(transcriptionService)
+                .environment(modelManager)
         }
         .modelContainer(sharedModelContainer)
+
+        Settings {
+            ModelManagementView()
+                .environment(modelManager)
+                .environment(transcriptionService)
+        }
     }
 }
