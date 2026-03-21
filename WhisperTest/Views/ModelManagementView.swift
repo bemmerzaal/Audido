@@ -29,10 +29,12 @@ struct ModelManagementView: View {
                         Text(lang.name).tag(lang.code)
                     }
                 }
+
+                Toggle("Conversation Mode", isOn: Bindable(modelManager).conversationMode)
             } header: {
-                Text("Language")
+                Text("Transcription")
             } footer: {
-                Text("Select the language of the audio you want to transcribe. Use Auto-detect if unsure.")
+                Text("Select the language of the audio. Enable Conversation Mode to identify different speakers — the first use downloads a small speaker model (~50 MB).")
             }
 
             Section {

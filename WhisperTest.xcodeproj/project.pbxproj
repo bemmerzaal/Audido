@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		916679DF2F6E83C10085E819 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 916679DE2F6E83C10085E819 /* WhisperKit */; };
+		916679E22F6ECDF60085E819 /* SpeakerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 916679E12F6ECDF60085E819 /* SpeakerKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				916679DF2F6E83C10085E819 /* WhisperKit in Frameworks */,
+				916679E22F6ECDF60085E819 /* SpeakerKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +85,7 @@
 				9166799B2F6E80970085E819 /* WhisperTest */,
 				916679AB2F6E80990085E819 /* WhisperTestTests */,
 				916679B52F6E80990085E819 /* WhisperTestUITests */,
+				916679E02F6ECDF60085E819 /* Frameworks */,
 				9166799A2F6E80970085E819 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -95,6 +98,13 @@
 				916679B22F6E80990085E819 /* WhisperTestUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		916679E02F6ECDF60085E819 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -118,6 +128,7 @@
 			name = WhisperTest;
 			packageProductDependencies = (
 				916679DE2F6E83C10085E819 /* WhisperKit */,
+				916679E12F6ECDF60085E819 /* SpeakerKit */,
 			);
 			productName = WhisperTest;
 			productReference = 916679992F6E80970085E819 /* WhisperTest.app */;
@@ -621,6 +632,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 916679DD2F6E83C10085E819 /* XCRemoteSwiftPackageReference "WhisperKit" */;
 			productName = WhisperKit;
+		};
+		916679E12F6ECDF60085E819 /* SpeakerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 916679DD2F6E83C10085E819 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = SpeakerKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

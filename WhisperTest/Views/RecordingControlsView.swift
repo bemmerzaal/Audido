@@ -67,7 +67,7 @@ struct RecordingControlsView: View {
             Task {
                 recording.isTranscribing = true
                 do {
-                    let text = try await transcriptionService.transcribe(audioURL: recording.fileURL, language: modelManager.selectedLanguage)
+                    let text = try await transcriptionService.transcribe(audioURL: recording.fileURL, language: modelManager.selectedLanguage, conversationMode: modelManager.conversationMode)
                     recording.transcriptionText = text
                 } catch {
                     print("Transcription failed: \(error)")

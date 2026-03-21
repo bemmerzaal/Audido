@@ -139,7 +139,7 @@ struct RecordingDetailView: View {
     private func transcribe() async {
         recording.isTranscribing = true
         do {
-            let text = try await transcriptionService.transcribe(audioURL: recording.fileURL, language: modelManager.selectedLanguage)
+            let text = try await transcriptionService.transcribe(audioURL: recording.fileURL, language: modelManager.selectedLanguage, conversationMode: modelManager.conversationMode)
             recording.transcriptionText = text
         } catch {
             errorMessage = "Transcription failed: \(error.localizedDescription)"
