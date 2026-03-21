@@ -25,7 +25,7 @@ final class AudioRecorderService {
         let converter = AVAudioConverter(from: inputFormat, to: recordingFormat)!
 
         let unsafeFile = file
-        nonisolated(unsafe) let unsafeSelf = self
+        let unsafeSelf = self
 
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { buffer, _ in
             let frameCount = AVAudioFrameCount(recordingFormat.sampleRate * Double(buffer.frameLength) / inputFormat.sampleRate)

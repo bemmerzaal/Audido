@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 enum SidebarItem: Hashable {
     case home
@@ -8,6 +9,7 @@ enum SidebarItem: Hashable {
     case podcasts
     case podcastDetail(Podcast)
     case podcastEpisode(Podcast, PodcastEpisode)
+    case importedFile(URL)
 }
 
 struct ContentView: View {
@@ -15,8 +17,10 @@ struct ContentView: View {
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(ModelManager.self) private var modelManager
     @Environment(PodcastService.self) private var podcastService
+    @Environment(\.modelContext) private var modelContext
     @State private var selection: SidebarItem? = .home
     @State private var showModelManagement = false
+    @State private var showFileImporter = false
 
     var body: some View {
         NavigationSplitView {
@@ -39,6 +43,14 @@ struct ContentView: View {
             }
             ToolbarItem(placement: .automatic) {
                 Button {
+                    showFileImporter = true
+                } label: {
+                    Label("Import Audio", systemImage: "doc.badge.plus")
+                }
+                .help("Import an audio file (MP3, M4A, WAV, etc.)")
+            }
+            ToolbarItem(placement: .automatic) {
+                Button {
                     showModelManagement = true
                 } label: {
                     Label("Models", systemImage: "cpu")
@@ -58,6 +70,20 @@ struct ContentView: View {
                         }
                     }
                 }
+        }
+        .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: [.audio, .mpeg4Audio, .mp3, .wav, .aiff],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    handleImportedFile(url)
+                }
+            case .failure(let error):
+                print("File import failed: \(error)")
+            }
         }
         .task {
             if let folder = modelManager.selectedModelFolder {
@@ -98,6 +124,8 @@ struct ContentView: View {
                 })
             case .podcastEpisode(let podcast, let episode):
                 PodcastEpisodeDetailView(episode: episode, podcast: podcast)
+            case .importedFile(let url):
+                ImportedFileView(fileURL: url)
             }
         }
     }
@@ -110,6 +138,31 @@ struct ContentView: View {
             audioRecorder.currentFileName = fileName
         } catch {
             print("Failed to start recording: \(error)")
+        }
+    }
+
+    private func handleImportedFile(_ url: URL) {
+        // Start accessing the security-scoped resource
+        guard url.startAccessingSecurityScopedResource() else {
+            print("Could not access file: \(url)")
+            return
+        }
+
+        // Copy file to app's documents to avoid sandbox issues
+        let importDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("ImportedAudio", isDirectory: true)
+        try? FileManager.default.createDirectory(at: importDir, withIntermediateDirectories: true)
+
+        let destURL = importDir.appendingPathComponent(url.lastPathComponent)
+        try? FileManager.default.removeItem(at: destURL)
+
+        do {
+            try FileManager.default.copyItem(at: url, to: destURL)
+            url.stopAccessingSecurityScopedResource()
+            selection = .importedFile(destURL)
+        } catch {
+            url.stopAccessingSecurityScopedResource()
+            print("Failed to copy imported file: \(error)")
         }
     }
 }

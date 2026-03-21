@@ -4,16 +4,30 @@ import AppKit
 import Observation
 
 @Observable
-final class PodcastService {
+final class PodcastService: NSObject {
     var searchResults: [Podcast] = []
     var episodes: [PodcastEpisode] = []
     var isSearching = false
     var isLoadingEpisodes = false
     var isDownloading = false
+    var isPaused = false
     var downloadProgress: Double = 0
+    var downloadedBytes: Int64 = 0
+    var totalBytes: Int64 = 0
     var errorMessage: String?
 
     private let session = URLSession.shared
+    private var downloadTask: URLSessionDownloadTask?
+    private var resumeData: Data?
+    private var downloadContinuation: CheckedContinuation<URL, Error>?
+    private var _downloadSession: URLSession?
+    private var downloadSession: URLSession {
+        if let session = _downloadSession { return session }
+        let config = URLSessionConfiguration.default
+        let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+        _downloadSession = session
+        return session
+    }
 
     // MARK: - iTunes Search
 
@@ -74,19 +88,18 @@ final class PodcastService {
     // MARK: - Download & Convert
 
     func downloadAndConvert(episode: PodcastEpisode) async throws -> URL {
-        isDownloading = true
-        downloadProgress = 0
-        errorMessage = nil
-
-        defer {
-            Task { @MainActor in
-                isDownloading = false
-                downloadProgress = 0
-            }
+        await MainActor.run {
+            isDownloading = true
+            isPaused = false
+            downloadProgress = 0
+            downloadedBytes = 0
+            totalBytes = 0
+            errorMessage = nil
+            resumeData = nil
         }
 
-        // Download MP3
-        let (tempURL, _) = try await downloadWithProgress(from: episode.audioURL)
+        // Download MP3 using URLSessionDownloadTask (fast + pause/resume/cancel)
+        let tempURL = try await downloadWithTask(from: episode.audioURL)
 
         // Convert to 16kHz mono WAV for WhisperKit
         let outputDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -94,48 +107,93 @@ final class PodcastService {
         try FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
 
         let outputURL = outputDir.appendingPathComponent("\(episode.id.hashValue).wav")
-
-        // Remove existing file if present
         try? FileManager.default.removeItem(at: outputURL)
 
+        await MainActor.run { downloadProgress = 0.9 }
         try await convertToWAV(input: tempURL, output: outputURL)
-
-        // Clean up temp file
         try? FileManager.default.removeItem(at: tempURL)
+
+        await MainActor.run {
+            isDownloading = false
+            downloadProgress = 0
+        }
 
         return outputURL
     }
 
-    private func downloadWithProgress(from url: URL) async throws -> (URL, URLResponse) {
-        let (asyncBytes, response) = try await session.bytes(from: url)
-        let expectedLength = response.expectedContentLength
-        var data = Data()
-        if expectedLength > 0 {
-            data.reserveCapacity(Int(expectedLength))
+    /// Convert an imported audio file (MP3, M4A, etc.) to 16kHz WAV
+    func convertImportedFile(at sourceURL: URL) async throws -> URL {
+        await MainActor.run {
+            isDownloading = true
+            isPaused = false
+            downloadProgress = 0.5
+            errorMessage = nil
         }
 
-        var downloaded: Int64 = 0
-        for try await byte in asyncBytes {
-            data.append(byte)
-            downloaded += 1
-            if expectedLength > 0 && downloaded % 65536 == 0 {
-                let progress = Double(downloaded) / Double(expectedLength)
-                await MainActor.run {
-                    self.downloadProgress = min(progress * 0.8, 0.8) // 80% for download, 20% for conversion
-                }
+        let outputDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("ImportedAudio", isDirectory: true)
+        try FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
+
+        let outputURL = outputDir.appendingPathComponent("\(UUID().uuidString).wav")
+
+        try await convertToWAV(input: sourceURL, output: outputURL)
+
+        await MainActor.run {
+            isDownloading = false
+            downloadProgress = 0
+        }
+
+        return outputURL
+    }
+
+    // MARK: - Download Control
+
+    func pauseDownload() {
+        downloadTask?.cancel(byProducingResumeData: { [weak self] data in
+            Task { @MainActor in
+                self?.resumeData = data
+                self?.isPaused = true
             }
-        }
+        })
+    }
 
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mp3")
-        try data.write(to: tempURL)
-        return (tempURL, response)
+    func resumeDownload() {
+        guard let data = resumeData else { return }
+        isPaused = false
+        let task = downloadSession.downloadTask(withResumeData: data)
+        downloadTask = task
+        task.resume()
+    }
+
+    func cancelDownload() {
+        downloadTask?.cancel()
+        downloadTask = nil
+        resumeData = nil
+        downloadContinuation?.resume(throwing: CancellationError())
+        downloadContinuation = nil
+
+        Task { @MainActor in
+            isDownloading = false
+            isPaused = false
+            downloadProgress = 0
+            downloadedBytes = 0
+            totalBytes = 0
+        }
+    }
+
+    // MARK: - Private
+
+    private func downloadWithTask(from url: URL) async throws -> URL {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.downloadContinuation = continuation
+            let task = downloadSession.downloadTask(with: url)
+            self.downloadTask = task
+            task.resume()
+        }
     }
 
     private func convertToWAV(input: URL, output: URL) async throws {
         let asset = AVURLAsset(url: input)
-
-        await MainActor.run { downloadProgress = 0.85 }
-
         let reader = try AVAssetReader(asset: asset)
 
         guard let audioTrack = try await asset.loadTracks(withMediaType: .audio).first else {
@@ -190,6 +248,50 @@ final class PodcastService {
     }
 }
 
+// MARK: - URLSessionDownloadDelegate
+
+extension PodcastService: URLSessionDownloadDelegate {
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        // Move file to a persistent temp location before the system cleans it up
+        let dest = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mp3")
+        do {
+            try FileManager.default.moveItem(at: location, to: dest)
+            downloadContinuation?.resume(returning: dest)
+        } catch {
+            downloadContinuation?.resume(throwing: error)
+        }
+        downloadContinuation = nil
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didWriteData bytesWritten: Int64, totalBytesWritten: Int64,
+                    totalBytesExpectedToWrite: Int64) {
+        Task { @MainActor in
+            self.downloadedBytes = totalBytesWritten
+            self.totalBytes = totalBytesExpectedToWrite > 0 ? totalBytesExpectedToWrite : 0
+            if totalBytesExpectedToWrite > 0 {
+                // 0-0.85 for download, 0.85-1.0 for conversion
+                self.downloadProgress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite) * 0.85
+            }
+        }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error = error {
+            let nsError = error as NSError
+            // Don't report cancellation from pause
+            if nsError.code == NSURLErrorCancelled, resumeData != nil {
+                return
+            }
+            if nsError.code == NSURLErrorCancelled {
+                return // User cancelled
+            }
+            downloadContinuation?.resume(throwing: error)
+            downloadContinuation = nil
+        }
+    }
+}
+
 // MARK: - Errors
 
 enum PodcastError: LocalizedError {
@@ -199,7 +301,7 @@ enum PodcastError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noAudioTrack:
-            return "No audio track found in the podcast episode."
+            return "No audio track found in the file."
         case .conversionFailed(let reason):
             return "Audio conversion failed: \(reason)"
         }
@@ -292,7 +394,6 @@ private class RSSParser: NSObject, XMLParserDelegate {
     private func cleanHTML(_ string: String) -> String {
         guard let data = string.data(using: .utf8),
               let attributed = try? NSAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html, .characterEncoding: String.Encoding.utf8.rawValue], documentAttributes: nil) else {
-            // Fallback: strip tags with regex
             return string.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
         }
         return attributed.string

@@ -1,22 +1,22 @@
 import SwiftUI
 import AVFoundation
 
-struct PodcastEpisodeDetailView: View {
+struct ImportedFileView: View {
     @Environment(PodcastService.self) private var podcastService
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(ModelManager.self) private var modelManager
-    let episode: PodcastEpisode
-    let podcast: Podcast
+    let fileURL: URL
 
     @State private var transcriptionText = ""
     @State private var isTranscribing = false
+    @State private var isConverting = false
     @State private var speakerMode: SpeakerMode = .single
     @State private var errorMessage: String?
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlaying = false
     @State private var playbackProgress: Double = 0
     @State private var playbackTimer: Timer?
-    @State private var localAudioURL: URL?
+    @State private var wavURL: URL?
 
     enum SpeakerMode: String, CaseIterable {
         case single = "Single Speaker"
@@ -25,28 +25,31 @@ struct PodcastEpisodeDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Episode info header
-            episodeHeader
+            // File info header
+            fileHeader
                 .padding()
 
             Divider()
 
-            // Playback bar (only when audio is downloaded)
-            if localAudioURL != nil {
-                playbackBar
-                    .padding()
-                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
-                    .padding(.horizontal)
-                    .padding(.top)
-            }
+            // Playback bar
+            playbackBar
+                .padding()
+                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+                .padding(.horizontal)
+                .padding(.top)
 
             Divider()
                 .padding(.top)
 
             // Content area
-            if podcastService.isDownloading {
-                downloadProgressView
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if isConverting {
+                VStack(spacing: 12) {
+                    ProgressView()
+                    Text("Converting audio to WAV...")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if isTranscribing {
                 VStack(spacing: 12) {
                     ProgressView()
@@ -63,7 +66,7 @@ struct PodcastEpisodeDetailView: View {
                 }
             } else {
                 VStack(spacing: 20) {
-                    Image(systemName: "text.below.photo")
+                    Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
 
@@ -77,11 +80,17 @@ struct PodcastEpisodeDetailView: View {
                             .pickerStyle(.menu)
                             .frame(width: 180)
 
-                            Button("Download & Transcribe") {
-                                Task { await downloadAndTranscribe() }
+                            Button("Transcribe") {
+                                Task { await transcribe() }
                             }
                             .buttonStyle(.borderedProminent)
                         }
+
+                        Text(speakerMode == .multi
+                             ? "Identifies different speakers in the conversation."
+                             : "Transcribes all audio as a single speaker.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     } else {
                         Text("Download and select a model in Settings to transcribe.")
                             .foregroundStyle(.secondary)
@@ -91,11 +100,14 @@ struct PodcastEpisodeDetailView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .navigationTitle(episode.title)
+        .navigationTitle(fileURL.deletingPathExtension().lastPathComponent)
         .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
             Button("OK") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+        .onAppear {
+            setupPlayer()
         }
         .onDisappear {
             stopPlayback()
@@ -103,107 +115,31 @@ struct PodcastEpisodeDetailView: View {
         }
     }
 
-    // MARK: - Download Progress with Controls
+    // MARK: - File Header
 
-    private var downloadProgressView: some View {
-        VStack(spacing: 16) {
-            ProgressView(value: podcastService.downloadProgress)
-                .progressViewStyle(.linear)
-                .frame(width: 300)
-
-            // Status text
-            if podcastService.isPaused {
-                Text("Paused")
-                    .foregroundStyle(.orange)
-                    .font(.caption)
-            } else if podcastService.downloadProgress >= 0.85 {
-                Text("Converting audio...")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-            } else {
-                VStack(spacing: 4) {
-                    Text("Downloading... \(Int(podcastService.downloadProgress / 0.85 * 100))%")
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
-
-                    if podcastService.totalBytes > 0 {
-                        Text("\(formatFileSize(podcastService.downloadedBytes)) / \(formatFileSize(podcastService.totalBytes))")
-                            .foregroundStyle(.tertiary)
-                            .font(.caption2)
-                            .monospacedDigit()
-                    }
-                }
-            }
-
-            // Control buttons
-            if podcastService.downloadProgress < 0.85 {
-                HStack(spacing: 12) {
-                    if podcastService.isPaused {
-                        Button {
-                            podcastService.resumeDownload()
-                        } label: {
-                            Label("Resume", systemImage: "play.fill")
-                        }
-                        .buttonStyle(.borderedProminent)
-                    } else {
-                        Button {
-                            podcastService.pauseDownload()
-                        } label: {
-                            Label("Pause", systemImage: "pause.fill")
-                        }
-                        .buttonStyle(.bordered)
-                    }
-
-                    Button(role: .destructive) {
-                        podcastService.cancelDownload()
-                    } label: {
-                        Label("Cancel", systemImage: "xmark")
-                    }
-                    .buttonStyle(.bordered)
-                }
-            }
-        }
-    }
-
-    // MARK: - Episode Header
-
-    private var episodeHeader: some View {
+    private var fileHeader: some View {
         HStack(spacing: 12) {
-            AsyncImage(url: podcast.artworkURL) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(.quaternary)
-                    .overlay {
-                        Image(systemName: "mic.fill")
-                            .foregroundStyle(.secondary)
-                    }
-            }
-            .frame(width: 60, height: 60)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            Image(systemName: "doc.fill")
+                .font(.system(size: 36))
+                .foregroundStyle(.tint)
+                .frame(width: 60, height: 60)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(podcast.name)
+                Text(fileURL.lastPathComponent)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+
+                let ext = fileURL.pathExtension.uppercased()
+                Text("Imported \(ext) file")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                Text(episode.title)
-                    .fontWeight(.medium)
-                    .lineLimit(2)
-
-                HStack(spacing: 8) {
-                    if let date = episode.publishedDate {
-                        Text(date, style: .date)
-                    }
-                    if let duration = episode.duration {
-                        Text("·")
-                        Text(duration)
-                    }
+                if let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
+                   let size = attrs[.size] as? Int64 {
+                    Text(formatFileSize(size))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
             }
 
             Spacer()
@@ -235,15 +171,24 @@ struct PodcastEpisodeDetailView: View {
         }
     }
 
+    private func setupPlayer() {
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: fileURL)
+            audioPlayer?.prepareToPlay()
+        } catch {
+            // File might need conversion to play
+            print("Could not create player for imported file: \(error)")
+        }
+    }
+
     private func togglePlayback() {
         if isPlaying { stopPlayback() } else { startPlayback() }
     }
 
     private func startPlayback() {
-        guard let url = localAudioURL else { return }
         do {
             if audioPlayer == nil {
-                audioPlayer = try AVAudioPlayer(contentsOf: url)
+                audioPlayer = try AVAudioPlayer(contentsOf: fileURL)
                 audioPlayer?.prepareToPlay()
             }
             audioPlayer?.play()
@@ -272,25 +217,32 @@ struct PodcastEpisodeDetailView: View {
         playbackTimer = nil
     }
 
-    // MARK: - Download & Transcribe
+    // MARK: - Transcribe
 
-    private func downloadAndTranscribe() async {
+    private func transcribe() async {
         do {
-            let wavURL = try await podcastService.downloadAndConvert(episode: episode)
-            localAudioURL = wavURL
+            // Convert to WAV if not already
+            let audioURL: URL
+            if fileURL.pathExtension.lowercased() == "wav" {
+                audioURL = fileURL
+            } else {
+                isConverting = true
+                audioURL = try await podcastService.convertImportedFile(at: fileURL)
+                wavURL = audioURL
+                isConverting = false
+            }
 
             isTranscribing = true
             let conversationMode = speakerMode == .multi
             let text = try await transcriptionService.transcribe(
-                audioURL: wavURL,
+                audioURL: audioURL,
                 language: modelManager.selectedLanguage,
                 conversationMode: conversationMode
             )
             transcriptionText = text
             isTranscribing = false
-        } catch is CancellationError {
-            // User cancelled, do nothing
         } catch {
+            isConverting = false
             isTranscribing = false
             errorMessage = "Failed: \(error.localizedDescription)"
         }
