@@ -1,10 +1,12 @@
 import SwiftUI
+import SwiftData
 import AVFoundation
 
 struct PodcastEpisodeDetailView: View {
     @Environment(PodcastService.self) private var podcastService
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(ModelManager.self) private var modelManager
+    @Environment(\.modelContext) private var modelContext
     let episode: PodcastEpisode
     let podcast: Podcast
 
@@ -17,6 +19,7 @@ struct PodcastEpisodeDetailView: View {
     @State private var playbackProgress: Double = 0
     @State private var playbackTimer: Timer?
     @State private var localAudioURL: URL?
+    @State private var existingRecording: Recording?
 
     enum SpeakerMode: String, CaseIterable {
         case single = "Single Speaker"
@@ -48,19 +51,10 @@ struct PodcastEpisodeDetailView: View {
                 downloadProgressView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if isTranscribing {
-                VStack(spacing: 12) {
-                    ProgressView()
-                    Text("Transcribing...")
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                TranscriptionProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !transcriptionText.isEmpty {
-                ScrollView {
-                    Text(transcriptionText)
-                        .textSelection(.enabled)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                TranscriptionTextView(text: transcriptionText)
             } else {
                 VStack(spacing: 20) {
                     Image(systemName: "text.below.photo")
@@ -97,9 +91,31 @@ struct PodcastEpisodeDetailView: View {
         } message: {
             Text(errorMessage ?? "")
         }
+        .onAppear {
+            loadExistingRecording()
+        }
         .onDisappear {
             stopPlayback()
             audioPlayer = nil
+        }
+    }
+
+    // MARK: - Load existing
+
+    private func loadExistingRecording() {
+        let episodeId = episode.id
+        let descriptor = FetchDescriptor<Recording>(
+            predicate: #Predicate { $0.title == episodeId || $0.podcastName != nil }
+        )
+        if let results = try? modelContext.fetch(descriptor) {
+            // Find by matching title to episode title
+            if let match = results.first(where: { $0.title == episode.title && $0.sourceType == .podcast }) {
+                existingRecording = match
+                transcriptionText = match.transcriptionText
+                if FileManager.default.fileExists(atPath: match.fileURL.path) {
+                    localAudioURL = match.fileURL
+                }
+            }
         }
     }
 
@@ -111,7 +127,6 @@ struct PodcastEpisodeDetailView: View {
                 .progressViewStyle(.linear)
                 .frame(width: 300)
 
-            // Status text
             if podcastService.isPaused {
                 Text("Paused")
                     .foregroundStyle(.orange)
@@ -135,7 +150,6 @@ struct PodcastEpisodeDetailView: View {
                 }
             }
 
-            // Control buttons
             if podcastService.downloadProgress < 0.85 {
                 HStack(spacing: 12) {
                     if podcastService.isPaused {
@@ -288,11 +302,38 @@ struct PodcastEpisodeDetailView: View {
             )
             transcriptionText = text
             isTranscribing = false
+
+            // Save as Recording in SwiftData
+            saveAsRecording(audioURL: wavURL, transcription: text)
         } catch is CancellationError {
-            // User cancelled, do nothing
+            // User cancelled download
+        } catch TranscriptionError.cancelled {
+            isTranscribing = false
         } catch {
             isTranscribing = false
             errorMessage = "Failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func saveAsRecording(audioURL: URL, transcription: String) {
+        if let existing = existingRecording {
+            // Update existing
+            existing.transcriptionText = transcription
+            existing.fileName = audioURL.path
+        } else {
+            // Create new
+            let recording = Recording(
+                title: episode.title,
+                duration: audioPlayer?.duration ?? 0,
+                fileName: audioURL.path,
+                transcriptionText: transcription,
+                sourceType: .podcast,
+                podcastName: podcast.name,
+                podcastArtworkURLString: podcast.artworkURL?.absoluteString,
+                episodeDuration: episode.duration
+            )
+            modelContext.insert(recording)
+            existingRecording = recording
         }
     }
 }

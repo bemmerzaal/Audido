@@ -15,8 +15,9 @@ struct SidebarView: View {
                 Label("Home", systemImage: "house.fill")
                     .tag(SidebarItem.home)
 
-                Label("Recordings", systemImage: "waveform")
+                Label("All Items", systemImage: "tray.full.fill")
                     .tag(SidebarItem.recordings)
+                    .badge(recordings.count)
 
                 Label("Podcasts", systemImage: "mic.fill")
                     .tag(SidebarItem.podcasts)
@@ -39,7 +40,11 @@ struct RecordingRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack {
+            HStack(spacing: 6) {
+                Image(systemName: recording.sourceIcon)
+                    .font(.caption2)
+                    .foregroundStyle(iconColor)
+
                 Text(recording.title)
                     .fontWeight(.medium)
                     .lineLimit(1)
@@ -59,11 +64,23 @@ struct RecordingRow: View {
             HStack {
                 Text(recording.createdAt, style: .date)
                 Text("·")
-                Text(formatDuration(recording.duration))
+                if recording.sourceType == .recording {
+                    Text(formatDuration(recording.duration))
+                } else {
+                    Text(recording.sourceLabel)
+                }
             }
             .font(.caption)
             .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
+    }
+
+    private var iconColor: Color {
+        switch recording.sourceType {
+        case .recording: return .red
+        case .importedFile: return .blue
+        case .podcast: return .purple
+        }
     }
 }

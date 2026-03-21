@@ -7,6 +7,7 @@ struct WhisperTestApp: App {
     @State private var transcriptionService = TranscriptionService()
     @State private var modelManager = ModelManager()
     @State private var podcastService = PodcastService()
+    @State private var summaryService = SummaryService()
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -17,7 +18,18 @@ struct WhisperTestApp: App {
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            // Schema changed — delete old database and recreate
+            print("ModelContainer migration failed, recreating: \(error)")
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            let dbFiles = ["default.store", "default.store-shm", "default.store-wal"]
+            for file in dbFiles {
+                try? FileManager.default.removeItem(at: appSupport.appendingPathComponent(file))
+            }
+            do {
+                return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            } catch {
+                fatalError("Could not create ModelContainer: \(error)")
+            }
         }
     }()
 
@@ -28,6 +40,7 @@ struct WhisperTestApp: App {
                 .environment(transcriptionService)
                 .environment(modelManager)
                 .environment(podcastService)
+                .environment(summaryService)
         }
         .modelContainer(sharedModelContainer)
 

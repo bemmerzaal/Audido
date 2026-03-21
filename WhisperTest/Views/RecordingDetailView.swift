@@ -19,6 +19,13 @@ struct RecordingDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Header for podcast items
+            if recording.sourceType == .podcast {
+                podcastHeader
+                    .padding()
+                Divider()
+            }
+
             // Playback controls
             playbackBar
                 .padding()
@@ -29,12 +36,8 @@ struct RecordingDetailView: View {
 
             // Transcription area
             if recording.isTranscribing {
-                VStack(spacing: 12) {
-                    ProgressView()
-                    Text("Transcribing...")
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                TranscriptionProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if recording.transcriptionText.isEmpty {
                 VStack(spacing: 20) {
                     Image(systemName: "text.below.photo")
@@ -71,12 +74,7 @@ struct RecordingDetailView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                ScrollView {
-                    Text(recording.transcriptionText)
-                        .textSelection(.enabled)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                TranscriptionTextView(text: recording.transcriptionText)
             }
         }
         .navigationTitle($recording.title)
@@ -95,6 +93,50 @@ struct RecordingDetailView: View {
             audioPlayer = nil
         }
     }
+
+    // MARK: - Podcast Header
+
+    private var podcastHeader: some View {
+        HStack(spacing: 12) {
+            if let artworkURL = recording.podcastArtworkURL {
+                AsyncImage(url: artworkURL) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(.quaternary)
+                        .overlay {
+                            Image(systemName: "mic.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                }
+                .frame(width: 50, height: 50)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                if let podcastName = recording.podcastName {
+                    Text(podcastName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                HStack(spacing: 8) {
+                    Text(recording.createdAt, style: .date)
+                    if let duration = recording.episodeDuration {
+                        Text("·")
+                        Text(duration)
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Playback
 
     private var playbackBar: some View {
         HStack(spacing: 16) {
@@ -169,6 +211,8 @@ struct RecordingDetailView: View {
                 conversationMode: conversationMode
             )
             recording.transcriptionText = text
+        } catch TranscriptionError.cancelled {
+            // User cancelled, do nothing
         } catch {
             errorMessage = "Transcription failed: \(error.localizedDescription)"
         }

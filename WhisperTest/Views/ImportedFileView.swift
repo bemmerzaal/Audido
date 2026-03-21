@@ -1,10 +1,12 @@
 import SwiftUI
+import SwiftData
 import AVFoundation
 
 struct ImportedFileView: View {
     @Environment(PodcastService.self) private var podcastService
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(ModelManager.self) private var modelManager
+    @Environment(\.modelContext) private var modelContext
     let fileURL: URL
 
     @State private var transcriptionText = ""
@@ -17,6 +19,7 @@ struct ImportedFileView: View {
     @State private var playbackProgress: Double = 0
     @State private var playbackTimer: Timer?
     @State private var wavURL: URL?
+    @State private var existingRecording: Recording?
 
     enum SpeakerMode: String, CaseIterable {
         case single = "Single Speaker"
@@ -51,19 +54,10 @@ struct ImportedFileView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if isTranscribing {
-                VStack(spacing: 12) {
-                    ProgressView()
-                    Text("Transcribing...")
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                TranscriptionProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !transcriptionText.isEmpty {
-                ScrollView {
-                    Text(transcriptionText)
-                        .textSelection(.enabled)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                TranscriptionTextView(text: transcriptionText)
             } else {
                 VStack(spacing: 20) {
                     Image(systemName: "doc.text.magnifyingglass")
@@ -108,10 +102,24 @@ struct ImportedFileView: View {
         }
         .onAppear {
             setupPlayer()
+            loadExistingRecording()
         }
         .onDisappear {
             stopPlayback()
             audioPlayer = nil
+        }
+    }
+
+    // MARK: - Load existing
+
+    private func loadExistingRecording() {
+        let path = fileURL.path
+        let descriptor = FetchDescriptor<Recording>(
+            predicate: #Predicate { $0.fileName == path }
+        )
+        if let match = try? modelContext.fetch(descriptor).first {
+            existingRecording = match
+            transcriptionText = match.transcriptionText
         }
     }
 
@@ -176,7 +184,6 @@ struct ImportedFileView: View {
             audioPlayer = try AVAudioPlayer(contentsOf: fileURL)
             audioPlayer?.prepareToPlay()
         } catch {
-            // File might need conversion to play
             print("Could not create player for imported file: \(error)")
         }
     }
@@ -241,10 +248,31 @@ struct ImportedFileView: View {
             )
             transcriptionText = text
             isTranscribing = false
+
+            // Save as Recording in SwiftData
+            saveAsRecording(transcription: text)
+        } catch TranscriptionError.cancelled {
+            isTranscribing = false
         } catch {
             isConverting = false
             isTranscribing = false
             errorMessage = "Failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func saveAsRecording(transcription: String) {
+        if let existing = existingRecording {
+            existing.transcriptionText = transcription
+        } else {
+            let recording = Recording(
+                title: fileURL.deletingPathExtension().lastPathComponent,
+                duration: audioPlayer?.duration ?? 0,
+                fileName: fileURL.path,
+                transcriptionText: transcription,
+                sourceType: .importedFile
+            )
+            modelContext.insert(recording)
+            existingRecording = recording
         }
     }
 }
