@@ -6,6 +6,7 @@ final class AudioRecorderService {
     var isRecording = false
     var audioLevel: Float = 0.0
     var currentDuration: TimeInterval = 0.0
+    var currentFileName: String?
 
     private var audioEngine: AVAudioEngine?
     private var audioFile: AVAudioFile?

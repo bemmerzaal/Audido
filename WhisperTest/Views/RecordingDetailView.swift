@@ -10,6 +10,12 @@ struct RecordingDetailView: View {
     @State private var playbackProgress: Double = 0
     @State private var playbackTimer: Timer?
     @State private var errorMessage: String?
+    @State private var speakerMode: SpeakerMode = .single
+
+    enum SpeakerMode: String, CaseIterable {
+        case single = "Single Speaker"
+        case multi = "Multi Speaker"
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,16 +36,33 @@ struct RecordingDetailView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if recording.transcriptionText.isEmpty {
-                VStack(spacing: 16) {
+                VStack(spacing: 20) {
                     Image(systemName: "text.below.photo")
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
 
                     if transcriptionService.isModelLoaded {
-                        Button("Transcribe") {
-                            Task { await transcribe() }
+                        // Speaker mode picker + Transcribe button
+                        HStack(spacing: 12) {
+                            Picker("Mode", selection: $speakerMode) {
+                                ForEach(SpeakerMode.allCases, id: \.self) { mode in
+                                    Text(mode.rawValue).tag(mode)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(width: 180)
+
+                            Button("Transcribe") {
+                                Task { await transcribe() }
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .buttonStyle(.borderedProminent)
+
+                        Text(speakerMode == .multi
+                             ? "Identifies different speakers in the conversation."
+                             : "Transcribes all audio as a single speaker.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     } else {
                         Text("Download and select a model in Settings to transcribe.")
                             .foregroundStyle(.secondary)
@@ -137,9 +160,14 @@ struct RecordingDetailView: View {
     }
 
     private func transcribe() async {
+        let conversationMode = speakerMode == .multi
         recording.isTranscribing = true
         do {
-            let text = try await transcriptionService.transcribe(audioURL: recording.fileURL, language: modelManager.selectedLanguage, conversationMode: modelManager.conversationMode)
+            let text = try await transcriptionService.transcribe(
+                audioURL: recording.fileURL,
+                language: modelManager.selectedLanguage,
+                conversationMode: conversationMode
+            )
             recording.transcriptionText = text
         } catch {
             errorMessage = "Transcription failed: \(error.localizedDescription)"

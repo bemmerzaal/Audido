@@ -3,50 +3,31 @@ import SwiftData
 
 struct SidebarView: View {
     @Query(sort: \Recording.createdAt, order: .reverse) private var recordings: [Recording]
-    @Environment(\.modelContext) private var modelContext
-    @Binding var selectedRecording: Recording?
-    @State private var searchText = ""
+    @Binding var selection: SidebarItem?
 
-    private var filteredRecordings: [Recording] {
-        if searchText.isEmpty {
-            return recordings
-        }
-        return recordings.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            $0.transcriptionText.localizedCaseInsensitiveContains(searchText)
-        }
+    private var recentRecordings: [Recording] {
+        Array(recordings.prefix(5))
     }
 
     var body: some View {
-        List(filteredRecordings, selection: $selectedRecording) { recording in
-            RecordingRow(recording: recording)
-                .tag(recording)
-                .contextMenu {
-                    Button("Delete", role: .destructive) {
-                        deleteRecording(recording)
+        List(selection: $selection) {
+            Section {
+                Label("Home", systemImage: "house.fill")
+                    .tag(SidebarItem.home)
+
+                Label("Recordings", systemImage: "waveform")
+                    .tag(SidebarItem.recordings)
+            }
+
+            if !recentRecordings.isEmpty {
+                Section("Recents") {
+                    ForEach(recentRecordings) { recording in
+                        RecordingRow(recording: recording)
+                            .tag(SidebarItem.recording(recording))
                     }
                 }
-        }
-        .searchable(text: $searchText, prompt: "Search recordings")
-        .overlay {
-            if recordings.isEmpty {
-                ContentUnavailableView(
-                    "No Recordings",
-                    systemImage: "waveform",
-                    description: Text("Press Record to start your first recording.")
-                )
-            } else if filteredRecordings.isEmpty {
-                ContentUnavailableView.search(text: searchText)
             }
         }
-    }
-
-    private func deleteRecording(_ recording: Recording) {
-        try? FileManager.default.removeItem(at: recording.fileURL)
-        if selectedRecording == recording {
-            selectedRecording = nil
-        }
-        modelContext.delete(recording)
     }
 }
 
