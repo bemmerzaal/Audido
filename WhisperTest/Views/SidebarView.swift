@@ -17,6 +17,9 @@ struct SidebarView: View {
 
                 Label("Recordings", systemImage: "waveform")
                     .tag(SidebarItem.recordings)
+
+                Label("Podcasts", systemImage: "mic.fill")
+                    .tag(SidebarItem.podcasts)
             }
 
             if !recentRecordings.isEmpty {

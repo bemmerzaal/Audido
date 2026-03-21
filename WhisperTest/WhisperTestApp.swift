@@ -6,6 +6,7 @@ struct WhisperTestApp: App {
     @State private var audioRecorder = AudioRecorderService()
     @State private var transcriptionService = TranscriptionService()
     @State private var modelManager = ModelManager()
+    @State private var podcastService = PodcastService()
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -26,6 +27,7 @@ struct WhisperTestApp: App {
                 .environment(audioRecorder)
                 .environment(transcriptionService)
                 .environment(modelManager)
+                .environment(podcastService)
         }
         .modelContainer(sharedModelContainer)
 

@@ -24,8 +24,8 @@ final class AudioRecorderService {
 
         let converter = AVAudioConverter(from: inputFormat, to: recordingFormat)!
 
-        nonisolated(unsafe) let unsafeFile = file
-        nonisolated(unsafe) var unsafeSelf = self
+        let unsafeFile = file
+        nonisolated(unsafe) let unsafeSelf = self
 
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { buffer, _ in
             let frameCount = AVAudioFrameCount(recordingFormat.sampleRate * Double(buffer.frameLength) / inputFormat.sampleRate)
@@ -65,10 +65,11 @@ final class AudioRecorderService {
         isRecording = true
         currentDuration = 0
 
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                guard let self, let start = self.startTime else { return }
-                self.currentDuration = Date().timeIntervalSince(start)
+        let startDate = startTime!
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.currentDuration = Date().timeIntervalSince(startDate)
             }
         }
     }

@@ -5,12 +5,16 @@ enum SidebarItem: Hashable {
     case home
     case recordings
     case recording(Recording)
+    case podcasts
+    case podcastDetail(Podcast)
+    case podcastEpisode(Podcast, PodcastEpisode)
 }
 
 struct ContentView: View {
     @Environment(AudioRecorderService.self) private var audioRecorder
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(ModelManager.self) private var modelManager
+    @Environment(PodcastService.self) private var podcastService
     @State private var selection: SidebarItem? = .home
     @State private var showModelManagement = false
 
@@ -82,6 +86,18 @@ struct ContentView: View {
                 })
             case .recording(let recording):
                 RecordingDetailView(recording: recording)
+            case .podcasts:
+                PodcastSearchView(onSelectPodcast: { podcast in
+                    selection = .podcastDetail(podcast)
+                })
+            case .podcastDetail(let podcast):
+                PodcastEpisodeListView(podcast: podcast, onSelectEpisode: { episode in
+                    selection = .podcastEpisode(podcast, episode)
+                }, onBack: {
+                    selection = .podcasts
+                })
+            case .podcastEpisode(let podcast, let episode):
+                PodcastEpisodeDetailView(episode: episode, podcast: podcast)
             }
         }
     }
