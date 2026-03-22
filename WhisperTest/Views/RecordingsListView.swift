@@ -85,6 +85,7 @@ struct RecordingsListView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationTitle("All Items")
         .searchable(text: $searchText, placement: .toolbar, prompt: "Search...")
     }
