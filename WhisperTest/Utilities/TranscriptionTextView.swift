@@ -81,7 +81,7 @@ struct TranscriptionTextView: View {
 
             HStack(spacing: 8) {
                 ProgressView()
-                    .scaleEffect(0.7)
+                    .controlSize(.small)
                 Text("Generating summary...")
                     .foregroundStyle(.secondary)
                     .font(.caption)
