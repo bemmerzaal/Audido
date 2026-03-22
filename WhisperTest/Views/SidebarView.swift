@@ -16,8 +16,8 @@ struct SidebarView: View {
                     .tag(SidebarItem.home)
 
                 Label("All Items", systemImage: "tray.full.fill")
-                    .tag(SidebarItem.recordings)
                     .badge(recordings.count)
+                    .tag(SidebarItem.allItems)
 
                 Label("Podcasts", systemImage: "mic.fill")
                     .tag(SidebarItem.podcasts)

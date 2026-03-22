@@ -18,7 +18,6 @@ struct RecordingsListView: View {
     private var filteredRecordings: [Recording] {
         var result = recordings
 
-        // Filter by type
         switch filterType {
         case .all: break
         case .recording: result = result.filter { $0.sourceType == .recording }
@@ -26,7 +25,6 @@ struct RecordingsListView: View {
         case .podcast: result = result.filter { $0.sourceType == .podcast }
         }
 
-        // Filter by search text
         if !searchText.isEmpty {
             result = result.filter {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
@@ -39,7 +37,7 @@ struct RecordingsListView: View {
     }
 
     var body: some View {
-        List {
+        VStack(spacing: 0) {
             // Filter bar
             Picker("Filter", selection: $filterType) {
                 ForEach(FilterType.allCases, id: \.self) { type in
@@ -47,42 +45,51 @@ struct RecordingsListView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
+            .padding()
 
-            if filteredRecordings.isEmpty {
+            Divider()
+
+            // Content
+            if recordings.isEmpty {
                 ContentUnavailableView(
-                    recordings.isEmpty ? "No Items" : "No Results",
-                    systemImage: recordings.isEmpty ? "tray" : "magnifyingglass",
-                    description: Text(recordings.isEmpty
-                        ? "Record audio, import a file, or transcribe a podcast to get started."
-                        : "No items match your search or filter.")
+                    "No Items Yet",
+                    systemImage: "tray",
+                    description: Text("Record audio, import a file, or transcribe a podcast to get started.")
                 )
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .frame(maxWidth: .infinity, minHeight: 200)
+            } else if filteredRecordings.isEmpty {
+                ContentUnavailableView.search(text: searchText)
             } else {
-                ForEach(filteredRecordings) { recording in
-                    Button {
-                        onSelectRecording(recording)
-                    } label: {
-                        RecordingRow(recording: recording)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            deleteRecording(recording)
+                ScrollView {
+                    LazyVStack(spacing: 1) {
+                        ForEach(filteredRecordings) { recording in
+                            Button {
+                                onSelectRecording(recording)
+                            } label: {
+                                RecordingRow(recording: recording)
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button("Delete", role: .destructive) {
+                                    deleteRecording(recording)
+                                }
+                            }
+
+                            Divider()
+                                .padding(.leading)
                         }
                     }
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Search recordings, podcasts, imports...")
         .navigationTitle("All Items")
+        .searchable(text: $searchText, placement: .toolbar, prompt: "Search...")
     }
 
     private func deleteRecording(_ recording: Recording) {
-        // Only delete the audio file if it's a recording (not shared podcast/import files)
         if recording.sourceType == .recording {
             try? FileManager.default.removeItem(at: recording.fileURL)
         }

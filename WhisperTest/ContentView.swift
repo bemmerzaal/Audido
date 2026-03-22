@@ -4,7 +4,7 @@ import UniformTypeIdentifiers
 
 enum SidebarItem: Hashable {
     case home
-    case recordings
+    case allItems
     case recording(Recording)
     case podcasts
     case podcastDetail(Podcast)
@@ -85,6 +85,9 @@ struct ContentView: View {
                 print("File import failed: \(error)")
             }
         }
+        .onChange(of: selection) { oldValue, newValue in
+            print("[NAV] Selection changed: \(String(describing: oldValue)) → \(String(describing: newValue))")
+        }
         .task {
             if let folder = modelManager.selectedModelFolder {
                 try? await transcriptionService.loadModel(from: folder)
@@ -106,7 +109,7 @@ struct ContentView: View {
                 }, onSelectRecording: { recording in
                     selection = .recording(recording)
                 })
-            case .recordings:
+            case .allItems:
                 RecordingsListView(onSelectRecording: { recording in
                     selection = .recording(recording)
                 })
