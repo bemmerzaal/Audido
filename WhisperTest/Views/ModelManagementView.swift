@@ -3,6 +3,7 @@ import SwiftUI
 struct ModelManagementView: View {
     @Environment(ModelManager.self) private var modelManager
     @Environment(TranscriptionService.self) private var transcriptionService
+    @Environment(AudioDeviceManager.self) private var audioDeviceManager
 
     var body: some View {
         Form {
@@ -21,6 +22,20 @@ struct ModelManagementView: View {
                 }
             } header: {
                 Text("Current Model")
+            }
+
+            Section {
+                Picker("Microphone", selection: Bindable(audioDeviceManager).selectedDeviceUID) {
+                    Text("System Default").tag(nil as String?)
+                    Divider()
+                    ForEach(audioDeviceManager.inputDevices) { device in
+                        Text(device.name).tag(device.uniqueID as String?)
+                    }
+                }
+            } header: {
+                Text("Audio Input")
+            } footer: {
+                Text("Kies de microfoon voor opnames. Je iPhone kan als microfoon dienen via Continuity (zelfde Apple ID, Bluetooth/WiFi aan).")
             }
 
             Section {
@@ -66,6 +81,7 @@ struct ModelManagementView: View {
         .frame(minWidth: 450, minHeight: 400)
         .onAppear {
             modelManager.refreshModels()
+            audioDeviceManager.refreshDevices()
         }
     }
 

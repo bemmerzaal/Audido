@@ -17,6 +17,7 @@ struct ContentView: View {
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(ModelManager.self) private var modelManager
     @Environment(PodcastService.self) private var podcastService
+    @Environment(AudioDeviceManager.self) private var audioDeviceManager
     @Environment(\.modelContext) private var modelContext
     @State private var selection: SidebarItem? = .home
     @State private var showModelManagement = false
@@ -62,6 +63,7 @@ struct ContentView: View {
             ModelManagementView()
                 .environment(modelManager)
                 .environment(transcriptionService)
+                .environment(audioDeviceManager)
                 .frame(minWidth: 500, minHeight: 450)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
@@ -137,7 +139,7 @@ struct ContentView: View {
         let fileName = "recording-\(UUID().uuidString).wav"
         let fileURL = Recording.recordingsDirectory.appendingPathComponent(fileName)
         do {
-            try audioRecorder.startRecording(to: fileURL)
+            try audioRecorder.startRecording(to: fileURL, inputDeviceID: audioDeviceManager.resolvedDeviceID)
             audioRecorder.currentFileName = fileName
         } catch {
             print("Failed to start recording: \(error)")

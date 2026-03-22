@@ -1,4 +1,6 @@
 import AVFoundation
+import AudioToolbox
+import CoreAudio
 import Observation
 
 @Observable
@@ -13,9 +15,22 @@ final class AudioRecorderService {
     private var startTime: Date?
     private var timer: Timer?
 
-    func startRecording(to fileURL: URL) throws {
+    func startRecording(to fileURL: URL, inputDeviceID: AudioDeviceID? = nil) throws {
         let engine = AVAudioEngine()
         let inputNode = engine.inputNode
+
+        if let deviceID = inputDeviceID, let audioUnit = inputNode.audioUnit {
+            var id = deviceID
+            AudioUnitSetProperty(
+                audioUnit,
+                kAudioOutputUnitProperty_CurrentDevice,
+                kAudioUnitScope_Global,
+                0,
+                &id,
+                UInt32(MemoryLayout<AudioDeviceID>.size)
+            )
+        }
+
         let inputFormat = inputNode.outputFormat(forBus: 0)
 
         let recordingFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16000, channels: 1, interleaved: false)!

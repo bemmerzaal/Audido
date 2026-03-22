@@ -8,6 +8,7 @@ struct WhisperTestApp: App {
     @State private var modelManager = ModelManager()
     @State private var podcastService = PodcastService()
     @State private var summaryService = SummaryService()
+    @State private var audioDeviceManager = AudioDeviceManager()
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -41,6 +42,7 @@ struct WhisperTestApp: App {
                 .environment(modelManager)
                 .environment(podcastService)
                 .environment(summaryService)
+                .environment(audioDeviceManager)
         }
         .modelContainer(sharedModelContainer)
 
@@ -48,6 +50,7 @@ struct WhisperTestApp: App {
             ModelManagementView()
                 .environment(modelManager)
                 .environment(transcriptionService)
+                .environment(audioDeviceManager)
         }
     }
 }
