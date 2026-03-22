@@ -24,36 +24,20 @@ enum TranscriptionError: LocalizedError {
 @Observable
 final class TranscriptionService {
     var isModelLoaded = false
-    var statusMessage: String?
-    var transcriptionProgress: Double = 0
-    var isPaused = false
-    var isCancelled = false
-    var isTranscribing = false
     private var whisperKit: WhisperKit?
-    private var speakerKit: SpeakerKit?
 
     func loadModel(from folder: String) async throws {
         whisperKit = try await WhisperKit(modelFolder: folder)
         isModelLoaded = true
     }
 
-    // MARK: - Transcription Control
-
-    func pauseTranscription() {
-        isPaused = true
-        statusMessage = "Paused"
-    }
-
-    func resumeTranscription() {
-        isPaused = false
-    }
-
-    func cancelTranscription() {
-        isCancelled = true
-        isPaused = false // unblock if paused
-    }
-
-    func transcribe(audioURL: URL, language: String = "nl", conversationMode: Bool = false) async throws -> String {
+    func transcribe(
+        audioURL: URL,
+        language: String = "nl",
+        conversationMode: Bool = false,
+        onProgress: @escaping (Double, String) -> Void,
+        cancelCheck: @escaping () -> Bool
+    ) async throws -> String {
         guard let whisperKit else { throw TranscriptionError.noModelLoaded }
 
         let options = DecodingOptions(
@@ -65,77 +49,38 @@ final class TranscriptionService {
         let audioFile = try AVAudioFile(forReading: audioURL)
         let totalDuration = Double(audioFile.length) / audioFile.processingFormat.sampleRate
 
-        await MainActor.run {
-            statusMessage = "Transcribing audio..."
-            transcriptionProgress = 0
-            isPaused = false
-            isCancelled = false
-            isTranscribing = true
-        }
-
         let results = try await whisperKit.transcribe(
             audioPath: audioURL.path,
             decodeOptions: options,
-            callback: { [weak self] progress in
-                guard let self else { return false }
-
-                // Cancel check
-                if self.isCancelled { return false }
-
-                // Pause: spin-wait until resumed or cancelled
-                while self.isPaused && !self.isCancelled {
-                    Thread.sleep(forTimeInterval: 0.1)
-                }
-                if self.isCancelled { return false }
+            callback: { progress in
+                if cancelCheck() { return false }
 
                 // Calculate progress based on window position vs total audio duration
-                // Each window is ~30 seconds, windowId is 0-based
                 let processedSeconds = Double(progress.windowId + 1) * 30.0
                 let pct = min(processedSeconds / max(totalDuration, 1.0), 1.0)
 
                 Task { @MainActor in
-                    self.transcriptionProgress = pct
-                    self.statusMessage = "Transcribing... \(Int(pct * 100))%"
+                    onProgress(pct, "Transcribing... \(Int(pct * 100))%")
                 }
                 return true
             }
         )
 
-        // Check if cancelled after transcription returns
-        if isCancelled {
-            await MainActor.run {
-                isTranscribing = false
-                transcriptionProgress = 0
-                statusMessage = nil
-            }
+        if cancelCheck() {
             throw TranscriptionError.cancelled
         }
 
         if conversationMode {
-            await MainActor.run {
-                transcriptionProgress = 0.8
-                statusMessage = "Identifying speakers..."
+            Task { @MainActor in
+                onProgress(0.8, "Identifying speakers...")
             }
-            let result = try await transcribeWithSpeakers(audioURL: audioURL, transcriptionResults: results)
-            await MainActor.run {
-                transcriptionProgress = 0
-                isTranscribing = false
-            }
-            return result
+            return try await transcribeWithSpeakers(audioURL: audioURL, transcriptionResults: results)
         } else {
-            let text = results.map { $0.text }.joined(separator: " ").trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            await MainActor.run {
-                statusMessage = nil
-                transcriptionProgress = 0
-                isTranscribing = false
-            }
-            return text
+            return results.map { $0.text }.joined(separator: " ").trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         }
     }
 
     private func transcribeWithSpeakers(audioURL: URL, transcriptionResults: [TranscriptionResult]) async throws -> String {
-        statusMessage = "Identifying speakers..."
-
         let audioSamples = try loadAudioSamples(from: audioURL)
 
         let config = PyannoteConfig(download: true, verbose: false)
@@ -177,7 +122,6 @@ final class TranscriptionService {
         }
 
         await speakerKit.unloadModels()
-        statusMessage = nil
 
         return formattedText.trimmingCharacters(in: .whitespacesAndNewlines)
     }

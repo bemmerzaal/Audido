@@ -5,6 +5,7 @@ import AVFoundation
 struct PodcastEpisodeDetailView: View {
     @Environment(PodcastService.self) private var podcastService
     @Environment(TranscriptionService.self) private var transcriptionService
+    @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Environment(ModelManager.self) private var modelManager
     @Environment(\.modelContext) private var modelContext
     let episode: PodcastEpisode
@@ -51,7 +52,7 @@ struct PodcastEpisodeDetailView: View {
                 downloadProgressView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if isTranscribing {
-                TranscriptionProgressView()
+                TranscriptionProgressView(task: existingRecording.flatMap { transcriptionQueue.task(for: $0) })
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !transcriptionText.isEmpty {
                 TranscriptionTextView(text: transcriptionText)
@@ -97,6 +98,14 @@ struct PodcastEpisodeDetailView: View {
         .onDisappear {
             stopPlayback()
             audioPlayer = nil
+        }
+        .onChange(of: existingRecording?.isTranscribing) { _, newValue in
+            if let newValue, !newValue, isTranscribing {
+                isTranscribing = false
+                if let text = existingRecording?.transcriptionText, !text.isEmpty {
+                    transcriptionText = text
+                }
+            }
         }
     }
 
@@ -293,47 +302,38 @@ struct PodcastEpisodeDetailView: View {
             let wavURL = try await podcastService.downloadAndConvert(episode: episode)
             localAudioURL = wavURL
 
+            let recording = getOrCreateRecording(audioURL: wavURL)
             isTranscribing = true
-            let conversationMode = speakerMode == .multi
-            let text = try await transcriptionService.transcribe(
+            transcriptionQueue.enqueue(
+                recording: recording,
                 audioURL: wavURL,
                 language: modelManager.selectedLanguage,
-                conversationMode: conversationMode
+                conversationMode: speakerMode == .multi
             )
-            transcriptionText = text
-            isTranscribing = false
-
-            // Save as Recording in SwiftData
-            saveAsRecording(audioURL: wavURL, transcription: text)
         } catch is CancellationError {
             // User cancelled download
-        } catch TranscriptionError.cancelled {
-            isTranscribing = false
         } catch {
             isTranscribing = false
             errorMessage = "Failed: \(error.localizedDescription)"
         }
     }
 
-    private func saveAsRecording(audioURL: URL, transcription: String) {
+    private func getOrCreateRecording(audioURL: URL) -> Recording {
         if let existing = existingRecording {
-            // Update existing
-            existing.transcriptionText = transcription
             existing.fileName = audioURL.path
-        } else {
-            // Create new
-            let recording = Recording(
-                title: episode.title,
-                duration: audioPlayer?.duration ?? 0,
-                fileName: audioURL.path,
-                transcriptionText: transcription,
-                sourceType: .podcast,
-                podcastName: podcast.name,
-                podcastArtworkURLString: podcast.artworkURL?.absoluteString,
-                episodeDuration: episode.duration
-            )
-            modelContext.insert(recording)
-            existingRecording = recording
+            return existing
         }
+        let recording = Recording(
+            title: episode.title,
+            duration: audioPlayer?.duration ?? 0,
+            fileName: audioURL.path,
+            sourceType: .podcast,
+            podcastName: podcast.name,
+            podcastArtworkURLString: podcast.artworkURL?.absoluteString,
+            episodeDuration: episode.duration
+        )
+        modelContext.insert(recording)
+        existingRecording = recording
+        return recording
     }
 }

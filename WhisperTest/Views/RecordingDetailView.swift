@@ -4,6 +4,7 @@ import AVFoundation
 struct RecordingDetailView: View {
     @Bindable var recording: Recording
     @Environment(TranscriptionService.self) private var transcriptionService
+    @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Environment(ModelManager.self) private var modelManager
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlaying = false
@@ -36,7 +37,7 @@ struct RecordingDetailView: View {
 
             // Transcription area
             if recording.isTranscribing {
-                TranscriptionProgressView()
+                TranscriptionProgressView(task: transcriptionQueue.task(for: recording))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if recording.transcriptionText.isEmpty {
                 VStack(spacing: 20) {
@@ -56,7 +57,7 @@ struct RecordingDetailView: View {
                             .frame(width: 180)
 
                             Button("Transcribe") {
-                                Task { await transcribe() }
+                                transcribe()
                             }
                             .buttonStyle(.borderedProminent)
                         }
@@ -201,21 +202,11 @@ struct RecordingDetailView: View {
         playbackTimer = nil
     }
 
-    private func transcribe() async {
-        let conversationMode = speakerMode == .multi
-        recording.isTranscribing = true
-        do {
-            let text = try await transcriptionService.transcribe(
-                audioURL: recording.fileURL,
-                language: modelManager.selectedLanguage,
-                conversationMode: conversationMode
-            )
-            recording.transcriptionText = text
-        } catch TranscriptionError.cancelled {
-            // User cancelled, do nothing
-        } catch {
-            errorMessage = "Transcription failed: \(error.localizedDescription)"
-        }
-        recording.isTranscribing = false
+    private func transcribe() {
+        transcriptionQueue.enqueue(
+            recording: recording,
+            language: modelManager.selectedLanguage,
+            conversationMode: speakerMode == .multi
+        )
     }
 }

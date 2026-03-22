@@ -4,11 +4,18 @@ import SwiftData
 @main
 struct WhisperTestApp: App {
     @State private var audioRecorder = AudioRecorderService()
-    @State private var transcriptionService = TranscriptionService()
+    @State private var transcriptionService: TranscriptionService
+    @State private var transcriptionQueue: TranscriptionQueue
     @State private var modelManager = ModelManager()
     @State private var podcastService = PodcastService()
     @State private var summaryService = SummaryService()
     @State private var audioDeviceManager = AudioDeviceManager()
+
+    init() {
+        let service = TranscriptionService()
+        _transcriptionService = State(initialValue: service)
+        _transcriptionQueue = State(initialValue: TranscriptionQueue(transcriptionService: service))
+    }
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -43,6 +50,7 @@ struct WhisperTestApp: App {
                 .environment(podcastService)
                 .environment(summaryService)
                 .environment(audioDeviceManager)
+                .environment(transcriptionQueue)
         }
         .modelContainer(sharedModelContainer)
 

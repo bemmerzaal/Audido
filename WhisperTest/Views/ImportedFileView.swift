@@ -5,6 +5,7 @@ import AVFoundation
 struct ImportedFileView: View {
     @Environment(PodcastService.self) private var podcastService
     @Environment(TranscriptionService.self) private var transcriptionService
+    @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Environment(ModelManager.self) private var modelManager
     @Environment(\.modelContext) private var modelContext
     let fileURL: URL
@@ -54,7 +55,7 @@ struct ImportedFileView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if isTranscribing {
-                TranscriptionProgressView()
+                TranscriptionProgressView(task: existingRecording.flatMap { transcriptionQueue.task(for: $0) })
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !transcriptionText.isEmpty {
                 TranscriptionTextView(text: transcriptionText)
@@ -107,6 +108,14 @@ struct ImportedFileView: View {
         .onDisappear {
             stopPlayback()
             audioPlayer = nil
+        }
+        .onChange(of: existingRecording?.isTranscribing) { _, newValue in
+            if let newValue, !newValue, isTranscribing {
+                isTranscribing = false
+                if let text = existingRecording?.transcriptionText, !text.isEmpty {
+                    transcriptionText = text
+                }
+            }
         }
     }
 
@@ -239,20 +248,14 @@ struct ImportedFileView: View {
                 isConverting = false
             }
 
+            let recording = getOrCreateRecording()
             isTranscribing = true
-            let conversationMode = speakerMode == .multi
-            let text = try await transcriptionService.transcribe(
+            transcriptionQueue.enqueue(
+                recording: recording,
                 audioURL: audioURL,
                 language: modelManager.selectedLanguage,
-                conversationMode: conversationMode
+                conversationMode: speakerMode == .multi
             )
-            transcriptionText = text
-            isTranscribing = false
-
-            // Save as Recording in SwiftData
-            saveAsRecording(transcription: text)
-        } catch TranscriptionError.cancelled {
-            isTranscribing = false
         } catch {
             isConverting = false
             isTranscribing = false
@@ -260,19 +263,18 @@ struct ImportedFileView: View {
         }
     }
 
-    private func saveAsRecording(transcription: String) {
+    private func getOrCreateRecording() -> Recording {
         if let existing = existingRecording {
-            existing.transcriptionText = transcription
-        } else {
-            let recording = Recording(
-                title: fileURL.deletingPathExtension().lastPathComponent,
-                duration: audioPlayer?.duration ?? 0,
-                fileName: fileURL.path,
-                transcriptionText: transcription,
-                sourceType: .importedFile
-            )
-            modelContext.insert(recording)
-            existingRecording = recording
+            return existing
         }
+        let recording = Recording(
+            title: fileURL.deletingPathExtension().lastPathComponent,
+            duration: audioPlayer?.duration ?? 0,
+            fileName: fileURL.path,
+            sourceType: .importedFile
+        )
+        modelContext.insert(recording)
+        existingRecording = recording
+        return recording
     }
 }

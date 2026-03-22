@@ -3,6 +3,7 @@ import SwiftData
 
 struct SidebarView: View {
     @Query(sort: \Recording.createdAt, order: .reverse) private var recordings: [Recording]
+    @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Binding var selection: SidebarItem?
 
     private var recentRecordings: [Recording] {
@@ -23,6 +24,15 @@ struct SidebarView: View {
                     .tag(SidebarItem.podcasts)
             }
 
+            if transcriptionQueue.hasActiveTasks {
+                Section("Transcriptions") {
+                    ForEach(transcriptionQueue.activeTasks) { task in
+                        TranscriptionQueueRow(task: task)
+                            .tag(SidebarItem.recording(task.recording))
+                    }
+                }
+            }
+
             if !recentRecordings.isEmpty {
                 Section("Recents") {
                     ForEach(recentRecordings) { recording in
@@ -30,6 +40,45 @@ struct SidebarView: View {
                             .tag(SidebarItem.recording(recording))
                     }
                 }
+            }
+        }
+    }
+}
+
+struct TranscriptionQueueRow: View {
+    @Environment(TranscriptionQueue.self) private var queue
+    let task: TranscriptionTask
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(task.recording.title)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+
+                Spacer()
+
+                if task.state == .active {
+                    Text("\(Int(task.progress * 100))%")
+                        .monospacedDigit()
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if task.state == .queued {
+                    Text("In wachtrij")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if task.state == .active {
+                ProgressView(value: task.progress)
+                    .progressViewStyle(.linear)
+            }
+        }
+        .padding(.vertical, 2)
+        .contextMenu {
+            Button("Cancel", role: .destructive) {
+                queue.cancelTask(task)
             }
         }
     }
