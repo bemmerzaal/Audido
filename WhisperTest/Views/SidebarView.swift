@@ -12,14 +12,14 @@ struct SidebarView: View {
     var body: some View {
         List(selection: $selection) {
             Section {
-                Label("Home", systemImage: "house.fill")
+                Label("Home", systemImage: "house")
                     .tag(SidebarItem.home)
 
-                Label("All Items", systemImage: "tray.full.fill")
+                Label("All Items", systemImage: "list.bullet.rectangle")
                     .badge(recordings.count)
                     .tag(SidebarItem.allItems)
 
-                Label("Podcasts", systemImage: "mic.fill")
+                Label("Search podcasts", systemImage: "apple.podcasts.pages")
                     .tag(SidebarItem.podcasts)
             }
 

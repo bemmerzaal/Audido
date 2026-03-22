@@ -40,7 +40,7 @@ struct RecordingDetailView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if recording.transcriptionText.isEmpty {
                 VStack(spacing: 20) {
-                    Image(systemName: "text.below.photo")
+                    Image(systemName: "text.word.spacing")
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
 
