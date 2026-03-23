@@ -18,8 +18,8 @@ struct RecordingDetailView: View {
     @State private var showInspector = true
     @State private var fontSize: Double = 14
     @State private var copied = false
-    @State private var summaryText: String?
     @State private var isSummarizing = false
+    @State private var isExtractingActions = false
     @State private var showUnavailableAlert = false
 
     enum SpeakerMode: String, CaseIterable {
@@ -89,8 +89,10 @@ struct RecordingDetailView: View {
                     TranscriptionTextView(
                         text: recording.transcriptionText,
                         fontSize: $fontSize,
-                        summaryText: $summaryText,
-                        isSummarizing: $isSummarizing
+                        summaryText: $recording.summaryText,
+                        actionItemsText: $recording.actionItemsText,
+                        isSummarizing: $isSummarizing,
+                        isExtractingActions: $isExtractingActions
                     )
                 }
             }
@@ -128,8 +130,8 @@ struct RecordingDetailView: View {
             stopPlayback()
             audioPlayer = nil
             playbackProgress = 0
-            summaryText = nil
             isSummarizing = false
+            isExtractingActions = false
         }
         .onDisappear {
             stopPlayback()
@@ -270,10 +272,10 @@ struct RecordingDetailView: View {
                 .help("Close inspector")
             }
 
-            // AI Summarize button (only when transcription exists)
+            // AI features (only when transcription exists)
             if !recording.transcriptionText.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("AI Summary")
+                    Text("AI Features")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -281,24 +283,49 @@ struct RecordingDetailView: View {
                         if summaryService.isAvailable {
                             Task {
                                 isSummarizing = true
-                                summaryText = nil
+                                recording.summaryText = nil
                                 await summaryService.summarize(
                                     text: recording.transcriptionText,
                                     language: modelManager.selectedLanguage
                                 )
-                                summaryText = summaryService.summaryText
+                                recording.summaryText = summaryService.summaryText
                                 isSummarizing = false
                             }
                         } else {
                             showUnavailableAlert = true
                         }
                     } label: {
-                        Label("AI Summarize", systemImage: "apple.intelligence")
+                        Label(recording.summaryText != nil ? "Regenerate Summary" : "AI Summary",
+                              systemImage: "apple.intelligence")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.purple)
                     .disabled(isSummarizing)
+
+                    Button {
+                        if summaryService.isAvailable {
+                            Task {
+                                isExtractingActions = true
+                                recording.actionItemsText = nil
+                                await summaryService.extractActionItems(
+                                    text: recording.transcriptionText,
+                                    language: modelManager.selectedLanguage
+                                )
+                                recording.actionItemsText = summaryService.actionItemsText
+                                isExtractingActions = false
+                            }
+                        } else {
+                            showUnavailableAlert = true
+                        }
+                    } label: {
+                        Label(recording.actionItemsText != nil ? "Regenerate Actions" : "Action Items",
+                              systemImage: "checklist")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                    .disabled(isExtractingActions)
                 }
 
                 Divider()
@@ -393,8 +420,14 @@ struct RecordingDetailView: View {
 
         if panel.runModal() == .OK, let url = panel.url {
             var exportText = ""
-            if let summary = summaryText {
-                exportText += "=== AI SUMMARY ===\n\(summary)\n\n=== TRANSCRIPTION ===\n"
+            if let summary = recording.summaryText {
+                exportText += "=== AI SUMMARY ===\n\(summary)\n\n"
+            }
+            if let actions = recording.actionItemsText {
+                exportText += "=== ACTION ITEMS ===\n\(actions)\n\n"
+            }
+            if recording.summaryText != nil || recording.actionItemsText != nil {
+                exportText += "=== TRANSCRIPTION ===\n"
             }
             exportText += recording.transcriptionText
             try? exportText.write(to: url, atomically: true, encoding: .utf8)

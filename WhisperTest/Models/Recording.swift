@@ -16,6 +16,8 @@ final class Recording {
     var transcriptionText: String
     var isTranscribing: Bool
     var sourceTypeRaw: String
+    var summaryText: String?
+    var actionItemsText: String?
     // Podcast metadata
     var podcastName: String?
     var podcastArtworkURLString: String?

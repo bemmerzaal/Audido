@@ -2,48 +2,76 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 
-/// Reusable transcription text display with optional AI summary
+/// Reusable transcription text display with optional AI summary and action items
 struct TranscriptionTextView: View {
     let text: String
     @Binding var fontSize: Double
     @Binding var summaryText: String?
+    @Binding var actionItemsText: String?
     @Binding var isSummarizing: Bool
+    @Binding var isExtractingActions: Bool
+
+    @State private var summaryExpanded = true
+    @State private var actionsExpanded = true
+    @State private var transcriptionExpanded = true
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                // AI Summary section (shown above transcription)
+                // AI Summary section
                 if isSummarizing {
-                    summaryLoadingView
+                    aiLoadingView(title: "AI Summary", message: "Generating summary...")
                         .padding()
                 } else if let summary = summaryText {
-                    summaryView(summary)
+                    collapsiblePanel(
+                        title: "AI Summary",
+                        icon: "apple.intelligence",
+                        color: .purple,
+                        content: summary,
+                        isExpanded: $summaryExpanded,
+                        onDismiss: { summaryText = nil } as () -> Void
+                    )
+                    .padding()
+                }
+
+                // Action Items section
+                if isExtractingActions {
+                    aiLoadingView(title: "Action Items", message: "Extracting actions...")
                         .padding()
+                } else if let actions = actionItemsText {
+                    collapsiblePanel(
+                        title: "Action Items",
+                        icon: "checklist",
+                        color: .orange,
+                        content: actions,
+                        isExpanded: $actionsExpanded,
+                        onDismiss: { actionItemsText = nil } as () -> Void
+                    )
+                    .padding()
                 }
 
                 // Transcription text
-                Text(text)
-                    .font(.system(size: fontSize))
-                    .textSelection(.enabled)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                collapsiblePanel(
+                    title: "Transcription",
+                    icon: "text.alignleft",
+                    color: .secondary,
+                    content: text,
+                    isExpanded: $transcriptionExpanded,
+                    onDismiss: nil
+                )
+                .padding()
             }
-        }
-        .onChange(of: text) {
-            // Reset summary when text changes (different transcription)
-            summaryText = nil
-            isSummarizing = false
         }
     }
 
-    // MARK: - Summary Views
+    // MARK: - Shared AI Views
 
-    private var summaryLoadingView: some View {
+    private func aiLoadingView(title: String, message: String) -> some View {
         VStack(spacing: 12) {
             HStack {
-                Image(systemName: "apple.intelligence")
-                    .foregroundStyle(.purple)
-                Text("AI Summary")
+                Image(systemName: title == "AI Summary" ? "apple.intelligence" : "checklist")
+                    .foregroundStyle(title == "AI Summary" ? .purple : .orange)
+                Text(title)
                     .font(.headline)
                 Spacer()
             }
@@ -51,52 +79,84 @@ struct TranscriptionTextView: View {
             HStack(spacing: 8) {
                 ProgressView()
                     .controlSize(.small)
-                Text("Generating summary...")
+                Text(message)
                     .foregroundStyle(.secondary)
                     .font(.caption)
             }
         }
         .padding()
-        .background(.purple.opacity(0.05))
+        .background((title == "AI Summary" ? Color.purple : Color.orange).opacity(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    private func summaryView(_ summary: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private func collapsiblePanel(
+        title: String,
+        icon: String,
+        color: Color,
+        content: String,
+        isExpanded: Binding<Bool>,
+        onDismiss: (() -> Void)?
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header — always visible, acts as toggle
             HStack {
-                Image(systemName: "apple.intelligence")
-                    .foregroundStyle(.purple)
-                Text("AI Summary")
-                    .font(.headline)
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isExpanded.wrappedValue.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "chevron.right")
+                            .font(.caption2.weight(.semibold))
+                            .rotationEffect(.degrees(isExpanded.wrappedValue ? 90 : 0))
+                            .frame(width: 12)
+
+                        Image(systemName: icon)
+                            .foregroundStyle(color)
+                        Text(title)
+                            .font(.headline)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
                 Spacer()
 
-                Button {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(summary, forType: .string)
-                } label: {
-                    Image(systemName: "doc.on.doc")
-                        .font(.caption)
+                if isExpanded.wrappedValue {
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(content, forType: .string)
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Copy \(title.lowercased())")
                 }
-                .buttonStyle(.plain)
-                .help("Copy summary")
 
-                Button {
-                    summaryText = nil
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                if let onDismiss {
+                    Button {
+                        onDismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Dismiss \(title.lowercased())")
                 }
-                .buttonStyle(.plain)
-                .help("Dismiss summary")
             }
 
-            Text(summary)
-                .font(.system(size: fontSize))
-                .textSelection(.enabled)
+            // Content — collapsible
+            if isExpanded.wrappedValue {
+                Text(content)
+                    .font(.system(size: fontSize))
+                    .textSelection(.enabled)
+                    .padding(.top, 8)
+            }
         }
         .padding()
-        .background(.purple.opacity(0.05))
+        .background(color.opacity(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

@@ -5,6 +5,7 @@ struct ActiveRecordingView: View {
     @Environment(AudioRecorderService.self) private var audioRecorder
     @Environment(\.modelContext) private var modelContext
     var onRecordingSaved: (Recording) -> Void
+    @State private var isStopping = false
 
     var body: some View {
         VStack(spacing: 32) {
@@ -15,7 +16,7 @@ struct ActiveRecordingView: View {
                 Image(systemName: "record.circle")
                     .font(.system(size: 64))
                     .foregroundStyle(.red)
-                    .symbolEffect(.pulse, isActive: true)
+                    .symbolEffect(.pulse, isActive: audioRecorder.isRecording)
 
                 Text("Recording...")
                     .font(.title2)
@@ -24,23 +25,27 @@ struct ActiveRecordingView: View {
                 Text(formatDuration(audioRecorder.currentDuration))
                     .font(.system(size: 48, weight: .light, design: .monospaced))
                     .foregroundStyle(.secondary)
+                    .contentTransition(.numericText())
             }
 
-            // Audio level
-            AudioLevelIndicator(level: audioRecorder.audioLevel, barCount: 40)
+            // Audio level — 20 bars instead of 40
+            AudioLevelIndicator(level: audioRecorder.audioLevel, barCount: 20)
                 .frame(height: 32)
                 .padding(.horizontal, 48)
 
-            // Stop button
+            // Stop button — disabled while stopping to prevent double-click
             Button {
+                guard !isStopping else { return }
+                isStopping = true
                 stopRecording()
             } label: {
-                Label("Stop Recording", systemImage: "stop.circle.fill")
+                Label(isStopping ? "Stopping..." : "Stop Recording", systemImage: "stop.circle.fill")
                     .font(.title3)
             }
             .buttonStyle(.borderedProminent)
             .tint(.red)
             .controlSize(.large)
+            .disabled(isStopping)
 
             Spacer()
         }
@@ -50,7 +55,10 @@ struct ActiveRecordingView: View {
 
     private func stopRecording() {
         let duration = audioRecorder.stopRecording()
-        guard let fileName = audioRecorder.currentFileName else { return }
+        guard let fileName = audioRecorder.currentFileName else {
+            isStopping = false
+            return
+        }
         audioRecorder.currentFileName = nil
 
         let recording = Recording(

@@ -8,7 +8,9 @@ import FoundationModels
 @Observable
 final class SummaryService {
     var isSummarizing = false
+    var isExtractingActions = false
     var summaryText: String?
+    var actionItemsText: String?
     var errorMessage: String?
 
     /// Check if Apple Foundation Models are available on this device
@@ -117,6 +119,7 @@ final class SummaryService {
         let prompt = """
         Summarize the following transcription in a clear, concise summary. \
         Write the summary in \(languageName). \
+        Output ONLY plain text, no markdown, no links, no URLs. \
         Use bullet points for key topics discussed. \
         Keep it under 200 words.\(chunkNote)
 
@@ -128,11 +131,49 @@ final class SummaryService {
     }
 
     @available(macOS 26, *)
+    private func extractActionsFromChunk(text: String, languageName: String, chunkInfo: String? = nil) async throws -> String {
+        let session = LanguageModelSession()
+        let chunkNote = chunkInfo.map { " This is \($0) of a longer transcription." } ?? ""
+        let prompt = """
+        Extract all action items, tasks, agreements, and appointments from the following transcription. \
+        Write in \(languageName). \
+        Output ONLY plain text, no markdown, no links, no URLs. \
+        Format as a short bullet list using "- " prefix. \
+        Include the person's name if mentioned, for example: - [Jan] Schedule follow-up meeting. \
+        Only list concrete actions, not general discussion topics. \
+        If there are no action items, respond with "No action items found."\(chunkNote)
+
+        Transcription:
+        \(text)
+        """
+        let response = try await session.respond(to: prompt)
+        return response.content
+    }
+
+    @available(macOS 26, *)
+    private func deduplicateActions(actions: String, languageName: String) async throws -> String {
+        let session = LanguageModelSession()
+        let prompt = """
+        The following action items were extracted from different parts of one transcription. \
+        Merge duplicates and produce a single clean bullet list in \(languageName). \
+        Output ONLY plain text, no markdown, no links, no URLs. \
+        Use "- " prefix. Include names where available, for example: - [Jan] do something. \
+        Keep only concrete actions.
+
+        Action items:
+        \(actions)
+        """
+        let response = try await session.respond(to: prompt)
+        return response.content
+    }
+
+    @available(macOS 26, *)
     private func summarizeCombined(summaries: String, languageName: String) async throws -> String {
         let session = LanguageModelSession()
         let prompt = """
         The following are summaries of different parts of one transcription. \
         Combine them into a single coherent summary in \(languageName). \
+        Output ONLY plain text, no markdown, no links, no URLs. \
         Use bullet points for key topics discussed. \
         Keep it under 300 words.
 
@@ -173,8 +214,65 @@ final class SummaryService {
         return chunks
     }
 
+    func extractActionItems(text: String, language: String = "nl") async {
+        guard !text.isEmpty else { return }
+
+        #if canImport(FoundationModels)
+        if #available(macOS 26, *) {
+            guard isAvailable else {
+                errorMessage = unavailableReason
+                return
+            }
+
+            isExtractingActions = true
+            errorMessage = nil
+
+            do {
+                let languageName = languageDisplayName(for: language)
+                let result: String
+
+                if text.count <= Self.maxChunkSize {
+                    result = try await extractActionsFromChunk(text: text, languageName: languageName)
+                } else {
+                    let chunks = splitIntoChunks(text: text, maxSize: Self.maxChunkSize)
+                    var chunkResults: [String] = []
+
+                    for (index, chunk) in chunks.enumerated() {
+                        let items = try await extractActionsFromChunk(
+                            text: chunk,
+                            languageName: languageName,
+                            chunkInfo: "part \(index + 1) of \(chunks.count)"
+                        )
+                        if !items.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            chunkResults.append(items)
+                        }
+                    }
+
+                    let combined = chunkResults.joined(separator: "\n")
+                    result = try await deduplicateActions(actions: combined, languageName: languageName)
+                }
+
+                await MainActor.run {
+                    actionItemsText = result
+                    isExtractingActions = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Action item extraction failed: \(error.localizedDescription)"
+                    isExtractingActions = false
+                }
+            }
+        } else {
+            errorMessage = unavailableReason
+        }
+        #else
+        errorMessage = unavailableReason
+        #endif
+    }
+
     func clearSummary() {
         summaryText = nil
+        actionItemsText = nil
         errorMessage = nil
     }
 

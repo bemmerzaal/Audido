@@ -23,7 +23,9 @@ struct PodcastEpisodeDetailView: View {
     @State private var existingRecording: Recording?
     @State private var fontSize: Double = 14
     @State private var summaryText: String?
+    @State private var actionItemsText: String?
     @State private var isSummarizing = false
+    @State private var isExtractingActions = false
 
     enum SpeakerMode: String, CaseIterable {
         case single = "Single Speaker"
@@ -62,7 +64,9 @@ struct PodcastEpisodeDetailView: View {
                     text: transcriptionText,
                     fontSize: $fontSize,
                     summaryText: $summaryText,
-                    isSummarizing: $isSummarizing
+                    actionItemsText: $actionItemsText,
+                    isSummarizing: $isSummarizing,
+                    isExtractingActions: $isExtractingActions
                 )
             } else {
                 VStack(spacing: 20) {
