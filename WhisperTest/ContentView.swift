@@ -10,6 +10,7 @@ enum SidebarItem: Hashable {
     case podcastDetail(Podcast)
     case podcastEpisode(Podcast, PodcastEpisode)
     case importedFile(URL)
+    case meetingCapture
 }
 
 struct ContentView: View {
@@ -18,6 +19,7 @@ struct ContentView: View {
     @Environment(ModelManager.self) private var modelManager
     @Environment(PodcastService.self) private var podcastService
     @Environment(AudioDeviceManager.self) private var audioDeviceManager
+    @Environment(MeetingCaptureService.self) private var meetingCapture
     @Environment(\.modelContext) private var modelContext
     @State private var selection: SidebarItem? = .home
     @State private var showModelManagement = false
@@ -103,6 +105,10 @@ struct ContentView: View {
             ActiveRecordingView(onRecordingSaved: { recording in
                 selection = .recording(recording)
             })
+        } else if meetingCapture.isCapturing {
+            ActiveMeetingCaptureView(onCaptureSaved: { recording in
+                selection = .recording(recording)
+            })
         } else {
             switch selection {
             case .home, .none:
@@ -110,6 +116,8 @@ struct ContentView: View {
                     startRecording()
                 }, onSelectRecording: { recording in
                     selection = .recording(recording)
+                }, onStartMeetingCapture: {
+                    selection = .meetingCapture
                 })
             case .allItems:
                 RecordingsListView(onSelectRecording: { recording in
@@ -131,6 +139,10 @@ struct ContentView: View {
                 PodcastEpisodeDetailView(episode: episode, podcast: podcast)
             case .importedFile(let url):
                 ImportedFileView(fileURL: url)
+            case .meetingCapture:
+                MeetingCaptureSetupView(onCaptureSaved: { recording in
+                    selection = .recording(recording)
+                })
             }
         }
     }

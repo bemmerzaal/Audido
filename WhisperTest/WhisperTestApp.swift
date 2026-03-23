@@ -10,6 +10,7 @@ struct WhisperTestApp: App {
     @State private var podcastService = PodcastService()
     @State private var summaryService = SummaryService()
     @State private var audioDeviceManager = AudioDeviceManager()
+    @State private var meetingCaptureService = MeetingCaptureService()
 
     init() {
         let service = TranscriptionService()
@@ -50,6 +51,7 @@ struct WhisperTestApp: App {
                 .environment(podcastService)
                 .environment(summaryService)
                 .environment(audioDeviceManager)
+                .environment(meetingCaptureService)
                 .environment(transcriptionQueue)
         }
         .modelContainer(sharedModelContainer)

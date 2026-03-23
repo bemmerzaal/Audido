@@ -6,6 +6,7 @@ struct HomeView: View {
     @Environment(ModelManager.self) private var modelManager
     var onStartRecording: () -> Void
     var onSelectRecording: (Recording) -> Void
+    var onStartMeetingCapture: () -> Void
 
     private var transcriptionCount: Int {
         recordings.filter { !$0.transcriptionText.isEmpty }.count
@@ -31,25 +32,48 @@ struct HomeView: View {
                     )
                 }
 
-                // New Recording widget
-                Button(action: onStartRecording) {
-                    VStack(spacing: 12) {
-                        Image(systemName: "mic.circle.fill")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.red)
+                // Action tiles
+                HStack(spacing: 16) {
+                    // New Recording
+                    Button(action: onStartRecording) {
+                        VStack(spacing: 12) {
+                            Image(systemName: "mic.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.red)
 
-                        Text("New Recording")
-                            .font(.headline)
+                            Text("Record")
+                                .font(.headline)
 
-                        Text("Tap to start recording audio")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            Text("Microphone recording")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 28)
+                        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 32)
-                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+                    .buttonStyle(.plain)
+
+                    // Meeting Capture
+                    Button(action: onStartMeetingCapture) {
+                        VStack(spacing: 12) {
+                            Image(systemName: "video.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.blue)
+
+                            Text("Meeting")
+                                .font(.headline)
+
+                            Text("Capture system audio")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 28)
+                        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
 
                 // Model status
                 if modelManager.selectedModelName == nil {
