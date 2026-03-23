@@ -1,17 +1,26 @@
 import SwiftUI
 import AVFoundation
+import AppKit
+import UniformTypeIdentifiers
 
 struct RecordingDetailView: View {
     @Bindable var recording: Recording
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Environment(ModelManager.self) private var modelManager
+    @Environment(SummaryService.self) private var summaryService
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlaying = false
     @State private var playbackProgress: Double = 0
     @State private var playbackTimer: Timer?
     @State private var errorMessage: String?
     @State private var speakerMode: SpeakerMode = .single
+    @State private var showInspector = true
+    @State private var fontSize: Double = 14
+    @State private var copied = false
+    @State private var summaryText: String?
+    @State private var isSummarizing = false
+    @State private var showUnavailableAlert = false
 
     enum SpeakerMode: String, CaseIterable {
         case single = "Single Speaker"
@@ -19,75 +28,108 @@ struct RecordingDetailView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header for podcast items
-            if recording.sourceType == .podcast {
-                podcastHeader
+        HStack(spacing: 0) {
+            // MARK: - Main content (left side)
+            VStack(spacing: 0) {
+                // Header for podcast items
+                if recording.sourceType == .podcast {
+                    podcastHeader
+                        .padding()
+                    Divider()
+                }
+
+                // Playback controls
+                playbackBar
                     .padding()
+                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+                    .padding()
+
                 Divider()
+
+                // Transcription area
+                if recording.isTranscribing {
+                    TranscriptionProgressView(task: transcriptionQueue.task(for: recording))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if recording.transcriptionText.isEmpty {
+                    VStack(spacing: 20) {
+                        Image(systemName: "text.word.spacing")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+
+                        if transcriptionService.isModelLoaded {
+                            // Speaker mode picker + Transcribe button
+                            HStack(spacing: 12) {
+                                Picker("Mode", selection: $speakerMode) {
+                                    ForEach(SpeakerMode.allCases, id: \.self) { mode in
+                                        Text(mode.rawValue).tag(mode)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .frame(width: 180)
+
+                                Button("Transcribe") {
+                                    transcribe()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+
+                            Text(speakerMode == .multi
+                                 ? "Identifies different speakers in the conversation."
+                                 : "Transcribes all audio as a single speaker.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("Download and select a model in Settings to transcribe.")
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    TranscriptionTextView(
+                        text: recording.transcriptionText,
+                        fontSize: $fontSize,
+                        summaryText: $summaryText,
+                        isSummarizing: $isSummarizing
+                    )
+                }
             }
 
-            // Playback controls
-            playbackBar
-                .padding()
-                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
-                .padding()
+            // MARK: - Inspector panel (right side, full height)
+            if showInspector {
+                Divider()
 
-            Divider()
-
-            // Transcription area
-            if recording.isTranscribing {
-                TranscriptionProgressView(task: transcriptionQueue.task(for: recording))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if recording.transcriptionText.isEmpty {
-                VStack(spacing: 20) {
-                    Image(systemName: "text.word.spacing")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.secondary)
-
-                    if transcriptionService.isModelLoaded {
-                        // Speaker mode picker + Transcribe button
-                        HStack(spacing: 12) {
-                            Picker("Mode", selection: $speakerMode) {
-                                ForEach(SpeakerMode.allCases, id: \.self) { mode in
-                                    Text(mode.rawValue).tag(mode)
-                                }
-                            }
-                            .pickerStyle(.menu)
-                            .frame(width: 180)
-
-                            Button("Transcribe") {
-                                transcribe()
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-
-                        Text(speakerMode == .multi
-                             ? "Identifies different speakers in the conversation."
-                             : "Transcribes all audio as a single speaker.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text("Download and select a model in Settings to transcribe.")
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                TranscriptionTextView(text: recording.transcriptionText)
+                inspectorPanel
+                    .frame(width: 200)
             }
         }
         .navigationTitle($recording.title)
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    withAnimation { showInspector.toggle() }
+                } label: {
+                    Label("Inspector", systemImage: "sidebar.trailing")
+                }
+                .help("Toggle inspector panel")
+            }
+        }
         .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
             Button("OK") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
         }
+        .alert("AI Summarize Not Available", isPresented: $showUnavailableAlert) {
+            Button("OK") {}
+        } message: {
+            Text(summaryService.unavailableReason ?? "Apple Intelligence is not available on this device.")
+        }
         .onChange(of: recording.id) {
             stopPlayback()
             audioPlayer = nil
             playbackProgress = 0
+            summaryText = nil
+            isSummarizing = false
         }
         .onDisappear {
             stopPlayback()
@@ -208,5 +250,154 @@ struct RecordingDetailView: View {
             language: modelManager.selectedLanguage,
             conversationMode: speakerMode == .multi
         )
+    }
+
+    // MARK: - Inspector Panel
+
+    private var inspectorPanel: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("Options")
+                    .font(.headline)
+                Spacer()
+                Button {
+                    withAnimation { showInspector = false }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Close inspector")
+            }
+
+            // AI Summarize button (only when transcription exists)
+            if !recording.transcriptionText.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("AI Summary")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    Button {
+                        if summaryService.isAvailable {
+                            Task {
+                                isSummarizing = true
+                                summaryText = nil
+                                await summaryService.summarize(
+                                    text: recording.transcriptionText,
+                                    language: modelManager.selectedLanguage
+                                )
+                                summaryText = summaryService.summaryText
+                                isSummarizing = false
+                            }
+                        } else {
+                            showUnavailableAlert = true
+                        }
+                    } label: {
+                        Label("AI Summarize", systemImage: "apple.intelligence")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.purple)
+                    .disabled(isSummarizing)
+                }
+
+                Divider()
+            }
+
+            // Font size
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Font Size")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                HStack {
+                    Image(systemName: "textformat.size.smaller")
+                        .foregroundStyle(.secondary)
+                    Slider(value: $fontSize, in: 10...28, step: 1)
+                    Image(systemName: "textformat.size.larger")
+                        .foregroundStyle(.secondary)
+                }
+
+                Text("\(Int(fontSize)) pt")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+
+            // Copy & Export (only when transcription exists)
+            if !recording.transcriptionText.isEmpty {
+                Divider()
+
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(recording.transcriptionText, forType: .string)
+                    copied = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        copied = false
+                    }
+                } label: {
+                    Label(copied ? "Copied!" : "Copy Text", systemImage: copied ? "checkmark" : "doc.on.doc")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Button {
+                    exportToFile()
+                } label: {
+                    Label("Export as TXT", systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Divider()
+
+                // Word count info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Statistics")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    let words = recording.transcriptionText.split(separator: " ").count
+                    let chars = recording.transcriptionText.count
+
+                    HStack {
+                        Text("Words:")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(words)")
+                            .monospacedDigit()
+                    }
+                    .font(.caption)
+
+                    HStack {
+                        Text("Characters:")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(chars)")
+                            .monospacedDigit()
+                    }
+                    .font(.caption)
+                }
+            }
+
+            Spacer()
+        }
+        .padding()
+    }
+
+    private func exportToFile() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.plainText]
+        panel.nameFieldStringValue = "transcription.txt"
+        panel.canCreateDirectories = true
+
+        if panel.runModal() == .OK, let url = panel.url {
+            var exportText = ""
+            if let summary = summaryText {
+                exportText += "=== AI SUMMARY ===\n\(summary)\n\n=== TRANSCRIPTION ===\n"
+            }
+            exportText += recording.transcriptionText
+            try? exportText.write(to: url, atomically: true, encoding: .utf8)
+        }
     }
 }

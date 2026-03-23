@@ -21,6 +21,9 @@ struct ImportedFileView: View {
     @State private var playbackTimer: Timer?
     @State private var wavURL: URL?
     @State private var existingRecording: Recording?
+    @State private var fontSize: Double = 14
+    @State private var summaryText: String?
+    @State private var isSummarizing = false
 
     enum SpeakerMode: String, CaseIterable {
         case single = "Single Speaker"
@@ -58,7 +61,12 @@ struct ImportedFileView: View {
                 TranscriptionProgressView(task: existingRecording.flatMap { transcriptionQueue.task(for: $0) })
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !transcriptionText.isEmpty {
-                TranscriptionTextView(text: transcriptionText)
+                TranscriptionTextView(
+                    text: transcriptionText,
+                    fontSize: $fontSize,
+                    summaryText: $summaryText,
+                    isSummarizing: $isSummarizing
+                )
             } else {
                 VStack(spacing: 20) {
                     Image(systemName: "doc.text.magnifyingglass")
