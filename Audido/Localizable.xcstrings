@@ -1115,6 +1115,42 @@
         }
       }
     },
+    "recording.details" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Details" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Details" } }
+      }
+    },
+    "recording.title_label" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Title" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Titel" } }
+      }
+    },
+    "recording.title_placeholder" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Recording title…" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Opnametitel…" } }
+      }
+    },
+    "recording.notes" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notes" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Notities" } }
+      }
+    },
+    "recording.notes_placeholder" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add a short description…" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Voeg een korte beschrijving toe…" } }
+      }
+    },
+    "recording.tags" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tags" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Tags" } }
+      }
+    },
     "settings.active_model" : {
       "extractionState" : "stale",
       "localizations" : {

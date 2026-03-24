@@ -2,6 +2,7 @@ import SwiftUI
 import AVFoundation
 import AppKit
 import UniformTypeIdentifiers
+import SwiftData
 
 struct RecordingDetailView: View {
     @Bindable var recording: Recording
@@ -9,6 +10,7 @@ struct RecordingDetailView: View {
     @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Environment(ModelManager.self) private var modelManager
     @Environment(SummaryService.self) private var summaryService
+    @Query private var allRecordings: [Recording]
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlaying = false
     @State private var playbackProgress: Double = 0
@@ -21,6 +23,10 @@ struct RecordingDetailView: View {
     @State private var isSummarizing = false
     @State private var isExtractingActions = false
     @State private var showUnavailableAlert = false
+
+    private var allTags: [String] {
+        Array(Set(allRecordings.flatMap { $0.tags })).sorted()
+    }
 
     enum SpeakerMode: String, CaseIterable {
         case single = "Single Speaker"
@@ -274,6 +280,65 @@ struct RecordingDetailView: View {
                     .font(.headline)
                 Spacer()
             }
+
+            // MARK: Details section
+            VStack(alignment: .leading, spacing: 10) {
+                Text("recording.details")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                // Title
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("recording.title_label")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                    TextField("recording.title_placeholder", text: $recording.title)
+                        .textFieldStyle(.roundedBorder)
+                }
+
+                // Notes
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("recording.notes")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                    TextEditor(text: $recording.notes)
+                        .font(.body)
+                        .frame(minHeight: 64, maxHeight: 120)
+                        .scrollContentBackground(.hidden)
+                        .padding(6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color(nsColor: .textBackgroundColor))
+                                .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
+                        )
+                        .overlay(alignment: .topLeading) {
+                            if recording.notes.isEmpty {
+                                Text("recording.notes_placeholder")
+                                    .font(.body)
+                                    .foregroundStyle(Color(nsColor: .placeholderTextColor))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 10)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                }
+
+                // Tags
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("recording.tags")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                    TagInputView(
+                        tags: Binding(
+                            get: { recording.tags },
+                            set: { recording.tags = $0 }
+                        ),
+                        suggestions: allTags
+                    )
+                }
+            }
+
+            Divider()
 
             // AI features (only when transcription exists)
             if !recording.transcriptionText.isEmpty {
