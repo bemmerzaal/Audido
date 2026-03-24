@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct WhisperTestApp: App {
+struct AudidoApp: App {
     @State private var audioRecorder = AudioRecorderService()
     @State private var transcriptionService: TranscriptionService
     @State private var transcriptionQueue: TranscriptionQueue

@@ -1,13 +1,13 @@
 //
-//  WhisperTestUITestsLaunchTests.swift
-//  WhisperTestUITests
+//  AudidoUITestsLaunchTests.swift
+//  AudidoUITests
 //
 //  Created by B.P. Emmerzaal on 21/03/2026.
 //
 
 import XCTest
 
-final class WhisperTestUITestsLaunchTests: XCTestCase {
+final class AudidoUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

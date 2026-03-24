@@ -4,10 +4,28 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>WhisperTest.xcscheme_^#shared#^_</key>
+		<key>Audido.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>916679982F6E80970085E819</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>916679A72F6E80990085E819</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>916679B12F6E80990085E819</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

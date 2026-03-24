@@ -1,14 +1,14 @@
 //
-//  WhisperTestTests.swift
-//  WhisperTestTests
+//  AudidoTests.swift
+//  AudidoTests
 //
 //  Created by B.P. Emmerzaal on 21/03/2026.
 //
 
 import Testing
-@testable import WhisperTest
+@testable import Audido
 
-struct WhisperTestTests {
+struct AudidoTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

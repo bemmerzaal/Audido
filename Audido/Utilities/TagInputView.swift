@@ -52,16 +52,20 @@ struct TagInputView: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
-                            .background(Color.white)
 
                             if suggestion != filteredSuggestions.last {
                                 Divider()
                             }
                         }
                     }
-                    .background(Color.white)
+                    .padding(1)
+                    .compositingGroup()
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color(nsColor: NSColor.textBackgroundColor))
+                            .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+                    )
                     .clipShape(RoundedRectangle(cornerRadius: 6))
-                    .shadow(color: .black.opacity(0.15), radius: 6, y: 3)
                     .offset(y: 28)
                     .zIndex(10)
                 }

@@ -17,37 +17,37 @@
 			containerPortal = 916679912F6E80970085E819 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 916679982F6E80970085E819;
-			remoteInfo = WhisperTest;
+			remoteInfo = Audido;
 		};
 		916679B32F6E80990085E819 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 916679912F6E80970085E819 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 916679982F6E80970085E819;
-			remoteInfo = WhisperTest;
+			remoteInfo = Audido;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		916679992F6E80970085E819 /* WhisperTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WhisperTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		916679A82F6E80990085E819 /* WhisperTestTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WhisperTestTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		916679B22F6E80990085E819 /* WhisperTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WhisperTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		916679992F6E80970085E819 /* Audido.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Audido.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		916679A82F6E80990085E819 /* AudidoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudidoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		916679B22F6E80990085E819 /* AudidoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudidoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9166799B2F6E80970085E819 /* WhisperTest */ = {
+		9166799B2F6E80970085E819 /* Audido */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WhisperTest;
+			path = Audido;
 			sourceTree = "<group>";
 		};
-		916679AB2F6E80990085E819 /* WhisperTestTests */ = {
+		916679AB2F6E80990085E819 /* AudidoTestTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WhisperTestTests;
+			path = AudidoTestTests;
 			sourceTree = "<group>";
 		};
-		916679B52F6E80990085E819 /* WhisperTestUITests */ = {
+		916679B52F6E80990085E819 /* AudidoTestUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WhisperTestUITests;
+			path = AudidoTestUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -82,9 +82,9 @@
 		916679902F6E80970085E819 = {
 			isa = PBXGroup;
 			children = (
-				9166799B2F6E80970085E819 /* WhisperTest */,
-				916679AB2F6E80990085E819 /* WhisperTestTests */,
-				916679B52F6E80990085E819 /* WhisperTestUITests */,
+				9166799B2F6E80970085E819 /* Audido */,
+				916679AB2F6E80990085E819 /* AudidoTestTests */,
+				916679B52F6E80990085E819 /* AudidoTestUITests */,
 				916679E02F6ECDF60085E819 /* Frameworks */,
 				9166799A2F6E80970085E819 /* Products */,
 			);
@@ -93,9 +93,9 @@
 		9166799A2F6E80970085E819 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				916679992F6E80970085E819 /* WhisperTest.app */,
-				916679A82F6E80990085E819 /* WhisperTestTests.xctest */,
-				916679B22F6E80990085E819 /* WhisperTestUITests.xctest */,
+				916679992F6E80970085E819 /* Audido.app */,
+				916679A82F6E80990085E819 /* AudidoTests.xctest */,
+				916679B22F6E80990085E819 /* AudidoUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -110,9 +110,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		916679982F6E80970085E819 /* WhisperTest */ = {
+		916679982F6E80970085E819 /* Audido */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 916679BC2F6E80990085E819 /* Build configuration list for PBXNativeTarget "WhisperTest" */;
+			buildConfigurationList = 916679BC2F6E80990085E819 /* Build configuration list for PBXNativeTarget "Audido" */;
 			buildPhases = (
 				916679952F6E80970085E819 /* Sources */,
 				916679962F6E80970085E819 /* Frameworks */,
@@ -123,20 +123,20 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9166799B2F6E80970085E819 /* WhisperTest */,
+				9166799B2F6E80970085E819 /* Audido */,
 			);
-			name = WhisperTest;
+			name = Audido;
 			packageProductDependencies = (
 				916679DE2F6E83C10085E819 /* WhisperKit */,
 				916679E12F6ECDF60085E819 /* SpeakerKit */,
 			);
-			productName = WhisperTest;
-			productReference = 916679992F6E80970085E819 /* WhisperTest.app */;
+			productName = Audido;
+			productReference = 916679992F6E80970085E819 /* Audido.app */;
 			productType = "com.apple.product-type.application";
 		};
-		916679A72F6E80990085E819 /* WhisperTestTests */ = {
+		916679A72F6E80990085E819 /* AudidoTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 916679BF2F6E80990085E819 /* Build configuration list for PBXNativeTarget "WhisperTestTests" */;
+			buildConfigurationList = 916679BF2F6E80990085E819 /* Build configuration list for PBXNativeTarget "AudidoTests" */;
 			buildPhases = (
 				916679A42F6E80990085E819 /* Sources */,
 				916679A52F6E80990085E819 /* Frameworks */,
@@ -148,18 +148,18 @@
 				916679AA2F6E80990085E819 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				916679AB2F6E80990085E819 /* WhisperTestTests */,
+				916679AB2F6E80990085E819 /* AudidoTestTests */,
 			);
-			name = WhisperTestTests;
+			name = AudidoTests;
 			packageProductDependencies = (
 			);
-			productName = WhisperTestTests;
-			productReference = 916679A82F6E80990085E819 /* WhisperTestTests.xctest */;
+			productName = AudidoTests;
+			productReference = 916679A82F6E80990085E819 /* AudidoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		916679B12F6E80990085E819 /* WhisperTestUITests */ = {
+		916679B12F6E80990085E819 /* AudidoUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 916679C22F6E80990085E819 /* Build configuration list for PBXNativeTarget "WhisperTestUITests" */;
+			buildConfigurationList = 916679C22F6E80990085E819 /* Build configuration list for PBXNativeTarget "AudidoUITests" */;
 			buildPhases = (
 				916679AE2F6E80990085E819 /* Sources */,
 				916679AF2F6E80990085E819 /* Frameworks */,
@@ -171,13 +171,13 @@
 				916679B42F6E80990085E819 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				916679B52F6E80990085E819 /* WhisperTestUITests */,
+				916679B52F6E80990085E819 /* AudidoTestUITests */,
 			);
-			name = WhisperTestUITests;
+			name = AudidoUITests;
 			packageProductDependencies = (
 			);
-			productName = WhisperTestUITests;
-			productReference = 916679B22F6E80990085E819 /* WhisperTestUITests.xctest */;
+			productName = AudidoUITests;
+			productReference = 916679B22F6E80990085E819 /* AudidoUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -203,7 +203,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 916679942F6E80970085E819 /* Build configuration list for PBXProject "WhisperTest" */;
+			buildConfigurationList = 916679942F6E80970085E819 /* Build configuration list for PBXProject "Audido" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -220,9 +220,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				916679982F6E80970085E819 /* WhisperTest */,
-				916679A72F6E80990085E819 /* WhisperTestTests */,
-				916679B12F6E80990085E819 /* WhisperTestUITests */,
+				916679982F6E80970085E819 /* Audido */,
+				916679A72F6E80990085E819 /* AudidoTests */,
+				916679B12F6E80990085E819 /* AudidoUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -278,12 +278,12 @@
 /* Begin PBXTargetDependency section */
 		916679AA2F6E80990085E819 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 916679982F6E80970085E819 /* WhisperTest */;
+			target = 916679982F6E80970085E819 /* Audido */;
 			targetProxy = 916679A92F6E80990085E819 /* PBXContainerItemProxy */;
 		};
 		916679B42F6E80990085E819 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 916679982F6E80970085E819 /* WhisperTest */;
+			target = 916679982F6E80970085E819 /* Audido */;
 			targetProxy = 916679B32F6E80990085E819 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -414,7 +414,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = WhisperTest/WhisperTest.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Audido/Audido.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -434,14 +434,15 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Audido;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "WhisperTest needs microphone access to record audio for transcription.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Audido needs microphone access to record audio for transcription.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.WhisperTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.Audido;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -458,7 +459,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = WhisperTest/WhisperTest.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Audido/Audido.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -478,14 +479,15 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Audido;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "WhisperTest needs microphone access to record audio for transcription.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Audido needs microphone access to record audio for transcription.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.WhisperTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.Audido;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -507,14 +509,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.WhisperTestTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.AudidoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WhisperTest.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WhisperTest";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Audido.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Audido";
 			};
 			name = Debug;
 		};
@@ -528,14 +530,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.WhisperTestTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.AudidoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WhisperTest.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WhisperTest";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Audido.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Audido";
 			};
 			name = Release;
 		};
@@ -547,14 +549,14 @@
 				DEVELOPMENT_TEAM = 8GJVTSF253;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.WhisperTestUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.AudidoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = WhisperTest;
+				TEST_TARGET_NAME = Audido;
 			};
 			name = Debug;
 		};
@@ -566,21 +568,21 @@
 				DEVELOPMENT_TEAM = 8GJVTSF253;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.WhisperTestUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barendemmerzaal.AudidoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = WhisperTest;
+				TEST_TARGET_NAME = Audido;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		916679942F6E80970085E819 /* Build configuration list for PBXProject "WhisperTest" */ = {
+		916679942F6E80970085E819 /* Build configuration list for PBXProject "Audido" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				916679BA2F6E80990085E819 /* Debug */,
@@ -589,7 +591,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		916679BC2F6E80990085E819 /* Build configuration list for PBXNativeTarget "WhisperTest" */ = {
+		916679BC2F6E80990085E819 /* Build configuration list for PBXNativeTarget "Audido" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				916679BD2F6E80990085E819 /* Debug */,
@@ -598,7 +600,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		916679BF2F6E80990085E819 /* Build configuration list for PBXNativeTarget "WhisperTestTests" */ = {
+		916679BF2F6E80990085E819 /* Build configuration list for PBXNativeTarget "AudidoTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				916679C02F6E80990085E819 /* Debug */,
@@ -607,7 +609,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		916679C22F6E80990085E819 /* Build configuration list for PBXNativeTarget "WhisperTestUITests" */ = {
+		916679C22F6E80990085E819 /* Build configuration list for PBXNativeTarget "AudidoUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				916679C32F6E80990085E819 /* Debug */,
