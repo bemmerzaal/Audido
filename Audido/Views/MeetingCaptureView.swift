@@ -208,7 +208,7 @@ struct ActiveMeetingCaptureView: View {
         guard let fileName = captureService.currentFileName else { return }
 
         let recording = Recording(
-            title: "Meeting \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))",
+            title: "\(String(localized: "meeting.title_prefix")) \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))",
             duration: result.duration,
             fileName: fileName
         )

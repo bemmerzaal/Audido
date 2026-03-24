@@ -30,7 +30,7 @@ struct RecordingQuickLookPanel: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .help("Verberg detail panel")
+                .help("quicklook.hide_panel")
             }
             .padding(.horizontal)
             .padding(.vertical, 10)
@@ -128,15 +128,15 @@ struct RecordingQuickLookPanel: View {
     private var metadataSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Titel")
+                Text("recording.title_label")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                TextField("Titel", text: $recording.title)
+                TextField("recording.title_placeholder", text: $recording.title)
                     .textFieldStyle(.roundedBorder)
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Notities")
+                Text("recording.notes")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 TextEditor(text: $recording.notes)
@@ -149,7 +149,7 @@ struct RecordingQuickLookPanel: View {
                     )
                     .overlay(alignment: .topLeading) {
                         if recording.notes.isEmpty {
-                            Text("Voeg een korte beschrijving toe...")
+                            Text("recording.notes_placeholder")
                                 .foregroundStyle(.tertiary)
                                 .font(.body)
                                 .padding(.horizontal, 5)
@@ -165,7 +165,7 @@ struct RecordingQuickLookPanel: View {
 
     private var tagsSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Tags")
+            Text("recording.tags")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -190,7 +190,7 @@ struct RecordingQuickLookPanel: View {
                         .frame(width: 12)
                     Image(systemName: "apple.intelligence")
                         .foregroundStyle(.purple)
-                    Text("AI Samenvatting")
+                    Text("transcription.ai_summary")
                         .font(.subheadline.weight(.medium))
                     Spacer()
                 }
@@ -239,7 +239,7 @@ struct RecordingQuickLookPanel: View {
                 }
             }
         } catch {
-            print("Playback error: \(error)")
+            // Playback error silently handled
         }
     }
 

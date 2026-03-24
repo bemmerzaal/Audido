@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Observation
 
 enum TranscriptionTaskState: Equatable {
@@ -18,7 +19,7 @@ final class TranscriptionTask: Identifiable {
     let conversationMode: Bool
 
     var progress: Double = 0
-    var statusMessage: String = "In wachtrij"
+    var statusMessage: String = String(localized: "progress.in_queue")
     var state: TranscriptionTaskState = .queued
     var isCancelled = false
 

@@ -121,7 +121,7 @@ final class ModelManager {
                     self?.downloadProgress = progress.fractionCompleted
                 }
             }
-            print("Model downloaded to: \(folder)")
+            // Download complete
             refreshModels()
         } catch {
             errorMessage = "Download failed: \(error.localizedDescription)"

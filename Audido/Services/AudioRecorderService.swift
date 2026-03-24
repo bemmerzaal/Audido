@@ -40,7 +40,7 @@ final class AudioRecorderService {
         let converter = AVAudioConverter(from: inputFormat, to: recordingFormat)!
 
         // Use a dedicated serial queue for file writing to keep audio thread fast
-        let writeQueue = DispatchQueue(label: "com.whispertest.audiowrite", qos: .userInitiated)
+        let writeQueue = DispatchQueue(label: "com.audido.audiowrite", qos: .userInitiated)
 
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
             guard let self else { return }

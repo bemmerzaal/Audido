@@ -27,7 +27,7 @@ struct TagInputView: View {
 
             // Input field + autocomplete
             ZStack(alignment: .topLeading) {
-                TextField("Add tag...", text: $inputText)
+                TextField("recording.add_tag", text: $inputText)
                     .textFieldStyle(.roundedBorder)
                     .focused($isInputFocused)
                     .onSubmit { commitCurrentInput() }

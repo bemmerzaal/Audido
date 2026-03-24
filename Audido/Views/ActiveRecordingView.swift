@@ -61,7 +61,7 @@ struct ActiveRecordingView: View {
         audioRecorder.currentFileName = nil
 
         let recording = Recording(
-            title: "Recording \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))",
+            title: "\(String(localized: "recording.title_prefix")) \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))",
             duration: duration,
             fileName: fileName
         )

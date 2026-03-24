@@ -70,7 +70,7 @@ final class TranscriptionService {
                 let pct = min(processedSeconds / max(totalDuration, 1.0), 1.0)
 
                 Task { @MainActor in
-                    onProgress(pct, "Transcribing... \(Int(pct * 100))%")
+                    onProgress(pct, "\(String(localized: "progress.transcribing")) \(Int(pct * 100))%")
                 }
                 return true
             }
@@ -82,7 +82,7 @@ final class TranscriptionService {
 
         if conversationMode {
             Task { @MainActor in
-                onProgress(0.8, "Identifying speakers...")
+                onProgress(0.8, String(localized: "progress.identifying_speakers"))
             }
             return try await transcribeWithSpeakers(audioURL: audioURL, transcriptionResults: results)
         } else {
@@ -121,7 +121,7 @@ final class TranscriptionService {
                 guard !text.isEmpty else { continue }
 
                 if currentSpeaker != lastSpeaker {
-                    let speakerLabel = currentSpeaker.map { "Speaker \($0 + 1)" } ?? "Unknown"
+                    let speakerLabel = currentSpeaker.map { String(format: String(localized: "progress.speaker"), $0 + 1) } ?? String(localized: "progress.unknown_speaker")
                     if !formattedText.isEmpty { formattedText += "\n\n" }
                     formattedText += "[\(speakerLabel)]\n\(text)"
                     lastSpeaker = currentSpeaker

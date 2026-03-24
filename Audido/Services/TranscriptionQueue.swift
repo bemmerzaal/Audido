@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Observation
 
 @Observable
@@ -59,7 +60,7 @@ final class TranscriptionQueue {
     private func processTask(_ task: TranscriptionTask) async {
         await MainActor.run {
             task.state = .active
-            task.statusMessage = "Transcribing..."
+            task.statusMessage = String(localized: "progress.transcribing")
         }
 
         do {

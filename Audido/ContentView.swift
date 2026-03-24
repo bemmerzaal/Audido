@@ -128,12 +128,9 @@ struct ContentView: View {
                 if let url = urls.first {
                     handleImportedFile(url)
                 }
-            case .failure(let error):
-                print("File import failed: \(error)")
+            case .failure:
+                break
             }
-        }
-        .onChange(of: selection) { oldValue, newValue in
-            print("[NAV] Selection changed: \(String(describing: oldValue)) → \(String(describing: newValue))")
         }
         .task {
             if let folder = modelManager.selectedModelFolder {
@@ -257,13 +254,12 @@ struct ContentView: View {
             try audioRecorder.startRecording(to: fileURL, inputDeviceID: audioDeviceManager.resolvedDeviceID)
             audioRecorder.currentFileName = fileName
         } catch {
-            print("Failed to start recording: \(error)")
+            // Recording start failed
         }
     }
 
     private func handleImportedFile(_ url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
-            print("Could not access file: \(url)")
             return
         }
 
@@ -280,7 +276,6 @@ struct ContentView: View {
             selection = .importedFile(destURL)
         } catch {
             url.stopAccessingSecurityScopedResource()
-            print("Failed to copy imported file: \(error)")
         }
     }
 }

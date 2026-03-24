@@ -219,7 +219,7 @@ struct ImportedFileView: View {
             audioPlayer = try AVAudioPlayer(contentsOf: fileURL)
             audioPlayer?.prepareToPlay()
         } catch {
-            print("Could not create player for imported file: \(error)")
+            // Player creation failed
         }
     }
 
@@ -248,7 +248,7 @@ struct ImportedFileView: View {
                 }
             }
         } catch {
-            errorMessage = "Could not play audio: \(error.localizedDescription)"
+            errorMessage = String(format: String(localized: "error.playback_failed"), error.localizedDescription)
         }
     }
 

@@ -252,7 +252,7 @@ struct RecordingDetailView: View {
                 }
             }
         } catch {
-            errorMessage = "Could not play audio: \(error.localizedDescription)"
+            errorMessage = String(format: String(localized: "error.playback_failed"), error.localizedDescription)
         }
     }
 

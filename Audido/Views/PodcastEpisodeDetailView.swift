@@ -295,7 +295,7 @@ struct PodcastEpisodeDetailView: View {
                 }
             }
         } catch {
-            errorMessage = "Could not play audio: \(error.localizedDescription)"
+            errorMessage = String(format: String(localized: "error.playback_failed"), error.localizedDescription)
         }
     }
 
@@ -325,7 +325,7 @@ struct PodcastEpisodeDetailView: View {
             // User cancelled download
         } catch {
             isTranscribing = false
-            errorMessage = "Failed: \(error.localizedDescription)"
+            errorMessage = String(format: String(localized: "import.failed"), error.localizedDescription)
         }
     }
 
