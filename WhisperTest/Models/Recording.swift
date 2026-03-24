@@ -18,6 +18,8 @@ final class Recording {
     var sourceTypeRaw: String
     var summaryText: String?
     var actionItemsText: String?
+    var notes: String
+    var tagsRaw: String
     // Podcast metadata
     var podcastName: String?
     var podcastArtworkURLString: String?
@@ -33,7 +35,9 @@ final class Recording {
         sourceType: SourceType = .recording,
         podcastName: String? = nil,
         podcastArtworkURLString: String? = nil,
-        episodeDuration: String? = nil
+        episodeDuration: String? = nil,
+        notes: String = "",
+        tags: [String] = []
     ) {
         self.title = title
         self.createdAt = createdAt
@@ -45,6 +49,21 @@ final class Recording {
         self.podcastName = podcastName
         self.podcastArtworkURLString = podcastArtworkURLString
         self.episodeDuration = episodeDuration
+        self.notes = notes
+        self.tagsRaw = tags.joined(separator: ",")
+    }
+
+    /// Stored as comma-separated string for SwiftData compatibility
+    var tags: [String] {
+        get {
+            tagsRaw.isEmpty ? [] : tagsRaw
+                .components(separatedBy: ",")
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .filter { !$0.isEmpty }
+        }
+        set {
+            tagsRaw = newValue.joined(separator: ",")
+        }
     }
 
     var sourceType: SourceType {

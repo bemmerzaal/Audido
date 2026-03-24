@@ -7,26 +7,63 @@ struct PodcastSearchView: View {
     var onSelectPodcast: (Podcast) -> Void
 
     var body: some View {
-        List {
-            if podcastService.isSearching {
-                HStack {
-                    Spacer()
-                    ProgressView("Searching...")
-                    Spacer()
-                }
-                .listRowSeparator(.hidden)
-            }
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
 
-            ForEach(podcastService.searchResults) { podcast in
-                Button {
-                    onSelectPodcast(podcast)
-                } label: {
-                    PodcastRow(podcast: podcast)
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                        .font(.callout)
+
+                    TextField("Search podcasts...", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .frame(width: 220)
+
+                    if !searchText.isEmpty {
+                        Button {
+                            searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                                .font(.callout)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .buttonStyle(.plain)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color(NSColor.controlBackgroundColor))
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color(NSColor.separatorColor), lineWidth: 0.5)
+                )
+            }
+            .padding()
+
+            Divider()
+
+            List {
+                if podcastService.isSearching {
+                    HStack {
+                        Spacer()
+                        ProgressView("Searching...")
+                        Spacer()
+                    }
+                    .listRowSeparator(.hidden)
+                }
+
+                ForEach(podcastService.searchResults) { podcast in
+                    Button {
+                        onSelectPodcast(podcast)
+                    } label: {
+                        PodcastRow(podcast: podcast)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
-        .searchable(text: $searchText, prompt: "Search podcasts...")
         .onChange(of: searchText) { _, newValue in
             searchTask?.cancel()
             searchTask = Task {
@@ -36,6 +73,7 @@ struct PodcastSearchView: View {
             }
         }
         .navigationTitle("Podcasts")
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .overlay {
             if !podcastService.isSearching && podcastService.searchResults.isEmpty && searchText.isEmpty {
                 ContentUnavailableView(

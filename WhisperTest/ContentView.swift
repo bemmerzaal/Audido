@@ -24,41 +24,70 @@ struct ContentView: View {
     @State private var selection: SidebarItem? = .home
     @State private var showModelManagement = false
     @State private var showFileImporter = false
+    @State private var showRecordModePopover = false
 
     var body: some View {
         NavigationSplitView {
             SidebarView(selection: $selection)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 280)
         } detail: {
-            detailContent
+            VStack(spacing: 0) {
+                Divider()
+                detailContent
+            }
         }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    startRecording()
-                } label: {
-                    Label("Record", systemImage: "record.circle")
-                        .font(.title3)
+            ToolbarItem(placement: .principal) {
+                HStack(spacing: 10) {
+                    Button {
+                        showRecordModePopover = true
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "record.circle")
+                            Text("Nieuwe opname")
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 9)
+                        .foregroundStyle(.white)
+                        .background(Color.red)
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(audioRecorder.isRecording || meetingCapture.isCapturing)
+                    .opacity(audioRecorder.isRecording || meetingCapture.isCapturing ? 0.6 : 1)
+                    .popover(isPresented: $showRecordModePopover, arrowEdge: .bottom) {
+                        recordModePopover
+                    }
+
+                    Button {
+                        showFileImporter = true
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "doc.badge.plus")
+                            Text("Upload audio")
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .foregroundStyle(.primary)
+                        .background(Color(NSColor.windowBackgroundColor))
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .help("Importeer een audiobestand (MP3, M4A, WAV, etc.)")
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
-                .disabled(audioRecorder.isRecording)
             }
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    showFileImporter = true
-                } label: {
-                    Label("Import Audio", systemImage: "doc.badge.plus")
-                }
-                .help("Import an audio file (MP3, M4A, WAV, etc.)")
-            }
-            ToolbarItem(placement: .automatic) {
+
+            ToolbarItemGroup(placement: .primaryAction) {
                 Button {
                     showModelManagement = true
                 } label: {
-                    Label("Models", systemImage: "cpu")
+                    Image(systemName: "cpu")
                 }
-                .help("Manage Whisper models")
+                .help("Beheer Whisper modellen")
             }
         }
         .sheet(isPresented: $showModelManagement) {
@@ -98,6 +127,66 @@ struct ContentView: View {
             }
         }
     }
+
+    // MARK: - Recording mode popover
+
+    private var recordModePopover: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Kies opnamemodus")
+                .font(.headline)
+                .padding(.bottom, 4)
+
+            Button {
+                showRecordModePopover = false
+                startRecording()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "mic.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.red)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Microfoon")
+                            .fontWeight(.medium)
+                        Text("Neem op via je microfoon")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 6)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Divider()
+
+            Button {
+                showRecordModePopover = false
+                selection = .meetingCapture
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "video.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.blue)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Meeting Capture")
+                            .fontWeight(.medium)
+                        Text("Leg systeem audio vast (Teams, Zoom, etc.)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 6)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding()
+        .frame(width: 300)
+    }
+
+    // MARK: - Detail content
 
     @ViewBuilder
     private var detailContent: some View {
@@ -159,13 +248,11 @@ struct ContentView: View {
     }
 
     private func handleImportedFile(_ url: URL) {
-        // Start accessing the security-scoped resource
         guard url.startAccessingSecurityScopedResource() else {
             print("Could not access file: \(url)")
             return
         }
 
-        // Copy file to app's documents to avoid sandbox issues
         let importDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("ImportedAudio", isDirectory: true)
         try? FileManager.default.createDirectory(at: importDir, withIntermediateDirectories: true)
