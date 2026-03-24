@@ -90,7 +90,7 @@ struct HomeView: View {
             }
             .padding(24)
         }
-        .navigationTitle("Home")
+        .navigationTitle("home.nav_title")
     }
 }
 

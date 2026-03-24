@@ -6,65 +6,80 @@ struct ModelManagementView: View {
     @Environment(AudioDeviceManager.self) private var audioDeviceManager
 
     var body: some View {
+        let lang = modelManager.uiLanguage
         Form {
             Section {
                 if let selected = modelManager.selectedModelName,
                    let model = modelManager.availableModels.first(where: { $0.name == selected }) {
-                    LabeledContent("settings.active_model") {
+                    LabeledContent {
                         Text(model.displayName)
                             .fontWeight(.medium)
+                    } label: {
+                        Text(AppLocalization.string("settings.active_model", uiLanguage: lang))
                     }
                 } else {
-                    LabeledContent("settings.active_model") {
-                        Text("settings.none")
+                    LabeledContent {
+                        Text(AppLocalization.string("settings.none", uiLanguage: lang))
                             .foregroundStyle(.secondary)
+                    } label: {
+                        Text(AppLocalization.string("settings.active_model", uiLanguage: lang))
                     }
                 }
             } header: {
-                Text("settings.current_model")
+                Text(AppLocalization.string("settings.current_model", uiLanguage: lang))
             }
 
             Section {
-                Picker("settings.app_language", selection: Bindable(modelManager).uiLanguage) {
-                    Text("settings.dutch").tag("nl")
-                    Text("settings.english").tag("en")
+                Picker(selection: Bindable(modelManager).uiLanguage) {
+                    Text(AppLocalization.string("settings.dutch", uiLanguage: lang)).tag("nl")
+                    Text(AppLocalization.string("settings.english", uiLanguage: lang)).tag("en")
+                } label: {
+                    Text(AppLocalization.string("settings.app_language", uiLanguage: lang))
                 }
             } header: {
-                Text("settings.language")
+                Text(AppLocalization.string("settings.language", uiLanguage: lang))
             }
 
             Section {
-                Picker("settings.microphone", selection: Bindable(audioDeviceManager).selectedDeviceUID) {
-                    Text("settings.system_default").tag(nil as String?)
+                Picker(selection: Bindable(audioDeviceManager).selectedDeviceUID) {
+                    Text(AppLocalization.string("settings.system_default", uiLanguage: lang)).tag(nil as String?)
                     Divider()
                     ForEach(audioDeviceManager.inputDevices) { device in
                         Text(device.name).tag(device.uniqueID as String?)
                     }
+                } label: {
+                    Text(AppLocalization.string("settings.microphone", uiLanguage: lang))
                 }
             } header: {
-                Text("settings.audio_input")
+                Text(AppLocalization.string("settings.audio_input", uiLanguage: lang))
             } footer: {
-                Text("settings.microphone_hint")
+                Text(AppLocalization.string("settings.microphone_hint", uiLanguage: lang))
             }
 
             Section {
-                Picker("settings.transcription_language", selection: Bindable(modelManager).selectedLanguage) {
-                    ForEach(ModelManager.supportedLanguages, id: \.code) { lang in
-                        Text(lang.name).tag(lang.code)
+                Picker(selection: Bindable(modelManager).selectedLanguage) {
+                    ForEach(ModelManager.supportedLanguages, id: \.code) { codeName in
+                        Text(ModelManager.localizedLanguageName(code: codeName.code, fallback: codeName.name, uiLanguage: lang))
+                            .tag(codeName.code)
                     }
+                } label: {
+                    Text(AppLocalization.string("settings.transcription_language", uiLanguage: lang))
                 }
 
-                Toggle("settings.conversation_mode", isOn: Bindable(modelManager).conversationMode)
+                Toggle(isOn: Bindable(modelManager).conversationMode) {
+                    Text(AppLocalization.string("settings.conversation_mode", uiLanguage: lang))
+                }
             } header: {
-                Text("settings.transcription")
+                Text(AppLocalization.string("settings.transcription", uiLanguage: lang))
             } footer: {
-                Text("settings.conversation_hint")
+                Text(AppLocalization.string("settings.conversation_hint", uiLanguage: lang))
             }
 
             Section {
                 ForEach(modelManager.availableModels) { model in
                     ModelRow(
                         model: model,
+                        uiLanguage: lang,
                         isSelected: model.name == modelManager.selectedModelName,
                         isDownloading: modelManager.downloadingModelName == model.name,
                         downloadProgress: modelManager.downloadProgress,
@@ -74,9 +89,9 @@ struct ModelManagementView: View {
                     )
                 }
             } header: {
-                Text("settings.available_models")
+                Text(AppLocalization.string("settings.available_models", uiLanguage: lang))
             } footer: {
-                Text("settings.models_hint")
+                Text(AppLocalization.string("settings.models_hint", uiLanguage: lang))
             }
 
             if let error = modelManager.errorMessage {
@@ -88,6 +103,7 @@ struct ModelManagementView: View {
         }
         .formStyle(.grouped)
         .frame(minWidth: 450, minHeight: 400)
+        .id(lang)
         .onAppear {
             modelManager.refreshModels()
             audioDeviceManager.refreshDevices()
@@ -113,6 +129,7 @@ struct ModelManagementView: View {
 
 struct ModelRow: View {
     let model: WhisperModel
+    let uiLanguage: String
     let isSelected: Bool
     let isDownloading: Bool
     let downloadProgress: Double
@@ -151,7 +168,7 @@ struct ModelRow: View {
             } else if model.isDownloaded {
                 HStack(spacing: 8) {
                     if !isSelected {
-                        Button("settings.select") {
+                        Button(AppLocalization.string("settings.select", uiLanguage: uiLanguage)) {
                             onSelect()
                         }
                         .buttonStyle(.borderedProminent)
@@ -168,7 +185,11 @@ struct ModelRow: View {
                 Button {
                     onDownload()
                 } label: {
-                    Label("settings.download", systemImage: "arrow.down.circle")
+                    Label {
+                        Text(AppLocalization.string("settings.download", uiLanguage: uiLanguage))
+                    } icon: {
+                        Image(systemName: "arrow.down.circle")
+                    }
                 }
                 .controlSize(.small)
             }

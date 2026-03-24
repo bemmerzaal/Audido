@@ -11,7 +11,7 @@ struct PodcastEpisodeListView: View {
             if podcastService.isLoadingEpisodes {
                 HStack {
                     Spacer()
-                    ProgressView("Loading episodes...")
+                    ProgressView("podcast.loading_episodes")
                     Spacer()
                 }
                 .listRowSeparator(.hidden)
@@ -32,7 +32,7 @@ struct PodcastEpisodeListView: View {
                 Button {
                     onBack()
                 } label: {
-                    Label("Back", systemImage: "chevron.left")
+                    Label("podcast.back", systemImage: "chevron.left")
                 }
             }
         }
@@ -42,7 +42,7 @@ struct PodcastEpisodeListView: View {
         .overlay {
             if let error = podcastService.errorMessage {
                 ContentUnavailableView(
-                    "Error",
+                    "error.title",
                     systemImage: "exclamationmark.triangle",
                     description: Text(error)
                 )

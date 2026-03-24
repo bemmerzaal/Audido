@@ -86,7 +86,7 @@ struct ImportedFileView: View {
                         }
                     } else if transcriptionService.isModelLoaded {
                         HStack(spacing: 12) {
-                            Picker("Mode", selection: $speakerMode) {
+                            Picker("transcription.mode", selection: $speakerMode) {
                                 Text("transcription.single_speaker").tag(SpeakerMode.single)
                                 Text("transcription.multi_speaker").tag(SpeakerMode.multi)
                             }

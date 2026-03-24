@@ -68,7 +68,7 @@ struct RecordingQuickLookPanel: View {
 
                     // Open full view button — always visible at bottom
                     Button(action: onOpenFull) {
-                        Label("Open Full View", systemImage: "arrow.up.right.square")
+                        Label("quicklook.open_full", systemImage: "arrow.up.right.square")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)

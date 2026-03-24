@@ -14,7 +14,7 @@ struct SidebarView: View {
     var body: some View {
         List(selection: $selection) {
             Section {
-                Label("Home", systemImage: "house")
+                Label("sidebar.home", systemImage: "house")
                     .tag(SidebarItem.home)
 
                 Label("sidebar.all_items", systemImage: "list.bullet.rectangle")

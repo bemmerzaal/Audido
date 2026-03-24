@@ -11,10 +11,19 @@ struct RecordingsListView: View {
     var onSelectRecording: (Recording) -> Void
 
     enum FilterType: String, CaseIterable {
-        case all = "All"
-        case recording = "Recordings"
-        case importedFile = "Imports"
-        case podcast = "Podcasts"
+        case all
+        case recording
+        case importedFile
+        case podcast
+
+        var titleKey: LocalizedStringKey {
+            switch self {
+            case .all: return "list.filter.all"
+            case .recording: return "list.filter.recordings"
+            case .importedFile: return "list.filter.imports"
+            case .podcast: return "list.filter.podcasts"
+            }
+        }
     }
 
     private var filteredRecordings: [Recording] {
@@ -54,9 +63,9 @@ struct RecordingsListView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Search + filter bar — always anchored at top
                 HStack(spacing: 12) {
-                    Picker("Filter", selection: $filterType) {
+                    Picker("list.filter", selection: $filterType) {
                         ForEach(FilterType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
+                            Text(type.titleKey).tag(type)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -68,7 +77,7 @@ struct RecordingsListView: View {
                         Image(systemName: "magnifyingglass")
                             .foregroundStyle(.secondary)
                             .font(.callout)
-                        TextField("Zoeken...", text: $searchText)
+                        TextField("list.search_placeholder", text: $searchText)
                             .textFieldStyle(.plain)
                             .frame(width: 220)
                         if !searchText.isEmpty {
@@ -98,9 +107,9 @@ struct RecordingsListView: View {
                 // Content area
                 if recordings.isEmpty {
                     ContentUnavailableView(
-                        "No Items Yet",
+                        "list.empty_title",
                         systemImage: "tray",
-                        description: Text("Record audio, import a file, or transcribe a podcast to get started.")
+                        description: Text("list.empty_description")
                     )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if filteredRecordings.isEmpty {
@@ -131,7 +140,7 @@ struct RecordingsListView: View {
                                     Button {
                                         onSelectRecording(recording)
                                     } label: {
-                                        Label("Open", systemImage: "arrow.up.right.square")
+                                        Label("sidebar.open", systemImage: "arrow.up.right.square")
                                     }
 
                                     Divider()
@@ -142,7 +151,7 @@ struct RecordingsListView: View {
                                         }
                                         deleteRecording(recording)
                                     } label: {
-                                        Label("Verwijder", systemImage: "trash")
+                                        Label("sidebar.delete", systemImage: "trash")
                                     }
                                 }
 
@@ -169,7 +178,7 @@ struct RecordingsListView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .navigationTitle("All Items")
+        .navigationTitle("sidebar.all_items")
         .onChange(of: recordings) {
             if let sel = selectedRecording, !recordings.contains(where: { $0.id == sel.id }) {
                 selectedRecording = nil

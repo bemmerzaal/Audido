@@ -58,6 +58,20 @@ struct ContentView: View {
                     .popover(isPresented: $showRecordModePopover, arrowEdge: .bottom) {
                         recordModePopover
                     }
+                    .contextMenu {
+                        Button {
+                            showRecordModePopover = false
+                            startRecording()
+                        } label: {
+                            Label("nav.microphone", systemImage: "mic.circle.fill")
+                        }
+                        Button {
+                            showRecordModePopover = false
+                            selection = .meetingCapture
+                        } label: {
+                            Label("sidebar.meeting_capture", systemImage: "video.circle.fill")
+                        }
+                    }
 
                     Button {
                         showFileImporter = true

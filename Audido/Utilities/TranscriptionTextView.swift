@@ -20,43 +20,49 @@ struct TranscriptionTextView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // AI Summary section
                 if isSummarizing {
-                    aiLoadingView(title: "AI Summary", message: "Generating summary...")
+                    aiLoadingView(isSummary: true)
                         .padding()
                 } else if let summary = summaryText {
                     collapsiblePanel(
-                        title: "AI Summary",
+                        title: "transcription.ai_summary",
                         icon: "apple.intelligence",
                         color: .purple,
                         content: summary,
                         isExpanded: $summaryExpanded,
-                        onDismiss: { summaryText = nil } as () -> Void
+                        copyHelp: "transcription.help_copy_summary",
+                        dismissHelp: "transcription.dismiss_summary",
+                        onDismiss: { summaryText = nil }
                     )
                     .padding()
                 }
 
                 // Action Items section
                 if isExtractingActions {
-                    aiLoadingView(title: "Action Items", message: "Extracting actions...")
+                    aiLoadingView(isSummary: false)
                         .padding()
                 } else if let actions = actionItemsText {
                     collapsiblePanel(
-                        title: "Action Items",
+                        title: "transcription.action_items",
                         icon: "checklist",
                         color: .orange,
                         content: actions,
                         isExpanded: $actionsExpanded,
-                        onDismiss: { actionItemsText = nil } as () -> Void
+                        copyHelp: "transcription.help_copy_actions",
+                        dismissHelp: "transcription.dismiss_actions",
+                        onDismiss: { actionItemsText = nil }
                     )
                     .padding()
                 }
 
                 // Transcription text
                 collapsiblePanel(
-                    title: "Transcription",
+                    title: "transcription.panel_transcription",
                     icon: "text.alignleft",
                     color: .secondary,
                     content: text,
                     isExpanded: $transcriptionExpanded,
+                    copyHelp: "transcription.help_copy_transcription",
+                    dismissHelp: nil,
                     onDismiss: nil
                 )
                 .padding()
@@ -66,12 +72,12 @@ struct TranscriptionTextView: View {
 
     // MARK: - Shared AI Views
 
-    private func aiLoadingView(title: String, message: String) -> some View {
+    private func aiLoadingView(isSummary: Bool) -> some View {
         VStack(spacing: 12) {
             HStack {
-                Image(systemName: title == "AI Summary" ? "apple.intelligence" : "checklist")
-                    .foregroundStyle(title == "AI Summary" ? .purple : .orange)
-                Text(title)
+                Image(systemName: isSummary ? "apple.intelligence" : "checklist")
+                    .foregroundStyle(isSummary ? .purple : .orange)
+                Text(isSummary ? "transcription.ai_summary" : "transcription.action_items")
                     .font(.headline)
                 Spacer()
             }
@@ -79,22 +85,24 @@ struct TranscriptionTextView: View {
             HStack(spacing: 8) {
                 ProgressView()
                     .controlSize(.small)
-                Text(message)
+                Text(isSummary ? "transcription.generating_summary" : "transcription.extracting_actions")
                     .foregroundStyle(.secondary)
                     .font(.caption)
             }
         }
         .padding()
-        .background((title == "AI Summary" ? Color.purple : Color.orange).opacity(0.05))
+        .background((isSummary ? Color.purple : Color.orange).opacity(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func collapsiblePanel(
-        title: String,
+        title: LocalizedStringKey,
         icon: String,
         color: Color,
         content: String,
         isExpanded: Binding<Bool>,
+        copyHelp: LocalizedStringKey,
+        dismissHelp: LocalizedStringKey?,
         onDismiss: (() -> Void)?
     ) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -131,10 +139,10 @@ struct TranscriptionTextView: View {
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
-                    .help("Copy \(title.lowercased())")
+                    .help(copyHelp)
                 }
 
-                if let onDismiss {
+                if let onDismiss, let dismissHelp {
                     Button {
                         onDismiss()
                     } label: {
@@ -143,7 +151,7 @@ struct TranscriptionTextView: View {
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
-                    .help("Dismiss \(title.lowercased())")
+                    .help(dismissHelp)
                 }
             }
 

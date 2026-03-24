@@ -66,7 +66,7 @@ struct RecordingDetailView: View {
                         } else if transcriptionService.isModelLoaded {
                             // Speaker mode picker + Transcribe button
                             HStack(spacing: 12) {
-                                Picker("Mode", selection: $speakerMode) {
+                                Picker("transcription.mode", selection: $speakerMode) {
                                     Text("transcription.single_speaker").tag(SpeakerMode.single)
                                     Text("transcription.multi_speaker").tag(SpeakerMode.multi)
                                 }
@@ -121,8 +121,8 @@ struct RecordingDetailView: View {
                 }
             }
         }
-        .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button("OK") { errorMessage = nil }
+        .alert("error.title", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button("error.ok") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
         }
@@ -270,7 +270,7 @@ struct RecordingDetailView: View {
     private var inspectorPanel: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("Options")
+                Text("transcription.options")
                     .font(.headline)
                 Spacer()
             }
@@ -370,8 +370,16 @@ struct RecordingDetailView: View {
                         copied = false
                     }
                 } label: {
-                    Label(copied ? String(localized: "transcription.copied") : String(localized: "transcription.copy_text"), systemImage: copied ? "checkmark" : "doc.on.doc")
-                        .frame(maxWidth: .infinity)
+                    Label {
+                        if copied {
+                            Text("transcription.copied")
+                        } else {
+                            Text("transcription.copy_text")
+                        }
+                    } icon: {
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                    }
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)

@@ -147,4 +147,12 @@ final class ModelManager {
     func selectModel(_ name: String) {
         selectedModelName = name
     }
+
+    /// Display name for the transcription language picker in the app’s UI language.
+    static func localizedLanguageName(code: String, fallback: String, uiLanguage: String) -> String {
+        if code == "auto" {
+            return AppLocalization.string("language.auto", uiLanguage: uiLanguage)
+        }
+        return Locale(identifier: uiLanguage).localizedString(forLanguageCode: code) ?? fallback
+    }
 }

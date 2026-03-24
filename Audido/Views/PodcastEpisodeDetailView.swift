@@ -76,21 +76,20 @@ struct PodcastEpisodeDetailView: View {
 
                     if transcriptionService.isModelLoaded {
                         HStack(spacing: 12) {
-                            Picker("Mode", selection: $speakerMode) {
-                                ForEach(SpeakerMode.allCases, id: \.self) { mode in
-                                    Text(mode.rawValue).tag(mode)
-                                }
+                            Picker("transcription.mode", selection: $speakerMode) {
+                                Text("transcription.single_speaker").tag(SpeakerMode.single)
+                                Text("transcription.multi_speaker").tag(SpeakerMode.multi)
                             }
                             .pickerStyle(.menu)
                             .frame(width: 180)
 
-                            Button("Download & Transcribe") {
+                            Button("podcast.download_transcribe") {
                                 Task { await downloadAndTranscribe() }
                             }
                             .buttonStyle(.borderedProminent)
                         }
                     } else {
-                        Text("Download and select a model in Settings to transcribe.")
+                        Text("transcription.no_model")
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
@@ -99,8 +98,8 @@ struct PodcastEpisodeDetailView: View {
             }
         }
         .navigationTitle(episode.title)
-        .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button("OK") { errorMessage = nil }
+        .alert("error.title", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button("error.ok") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
         }
@@ -149,16 +148,16 @@ struct PodcastEpisodeDetailView: View {
                 .frame(width: 300)
 
             if podcastService.isPaused {
-                Text("Paused")
+                Text("podcast.paused")
                     .foregroundStyle(.orange)
                     .font(.caption)
             } else if podcastService.downloadProgress >= 0.85 {
-                Text("Converting audio...")
+                Text("podcast.converting_audio")
                     .foregroundStyle(.secondary)
                     .font(.caption)
             } else {
                 VStack(spacing: 4) {
-                    Text("Downloading... \(Int(podcastService.downloadProgress / 0.85 * 100))%")
+                    Text("podcast.downloading_percent \(Int(podcastService.downloadProgress / 0.85 * 100))")
                         .foregroundStyle(.secondary)
                         .font(.caption)
 
@@ -177,14 +176,14 @@ struct PodcastEpisodeDetailView: View {
                         Button {
                             podcastService.resumeDownload()
                         } label: {
-                            Label("Resume", systemImage: "play.fill")
+                            Label("podcast.resume", systemImage: "play.fill")
                         }
                         .buttonStyle(.borderedProminent)
                     } else {
                         Button {
                             podcastService.pauseDownload()
                         } label: {
-                            Label("Pause", systemImage: "pause.fill")
+                            Label("podcast.pause", systemImage: "pause.fill")
                         }
                         .buttonStyle(.bordered)
                     }
@@ -192,7 +191,7 @@ struct PodcastEpisodeDetailView: View {
                     Button(role: .destructive) {
                         podcastService.cancelDownload()
                     } label: {
-                        Label("Cancel", systemImage: "xmark")
+                        Label("podcast.cancel_download", systemImage: "xmark")
                     }
                     .buttonStyle(.bordered)
                 }

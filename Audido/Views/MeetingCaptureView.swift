@@ -36,7 +36,7 @@ struct MeetingCaptureSetupView: View {
                     Text("meeting.audio_source")
                         .font(.headline)
 
-                    Picker("Source", selection: $capture.captureAllSystemAudio) {
+                    Picker("meeting.source", selection: $capture.captureAllSystemAudio) {
                         Text("meeting.all_system_audio").tag(true)
                         Text("meeting.specific_app").tag(false)
                     }
@@ -52,7 +52,7 @@ struct MeetingCaptureSetupView: View {
                                     .foregroundStyle(.secondary)
                             }
                         } else {
-                            Picker("Application", selection: $capture.selectedApp) {
+                            Picker("meeting.application", selection: $capture.selectedApp) {
                                 Text("meeting.select_app").tag(nil as SCRunningApplication?)
                                 ForEach(captureService.availableApps, id: \.bundleIdentifier) { app in
                                     Text(app.applicationName).tag(app as SCRunningApplication?)

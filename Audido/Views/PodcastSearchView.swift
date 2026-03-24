@@ -16,7 +16,7 @@ struct PodcastSearchView: View {
                         .foregroundStyle(.secondary)
                         .font(.callout)
 
-                    TextField("Search podcasts...", text: $searchText)
+                    TextField("podcast.search_placeholder", text: $searchText)
                         .textFieldStyle(.plain)
                         .frame(width: 220)
 
@@ -48,7 +48,7 @@ struct PodcastSearchView: View {
                 if podcastService.isSearching {
                     HStack {
                         Spacer()
-                        ProgressView("Searching...")
+                        ProgressView("podcast.searching")
                         Spacer()
                     }
                     .listRowSeparator(.hidden)
@@ -72,14 +72,14 @@ struct PodcastSearchView: View {
                 await podcastService.searchPodcasts(query: newValue)
             }
         }
-        .navigationTitle("Podcasts")
+        .navigationTitle("podcast.nav_title")
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .overlay {
             if !podcastService.isSearching && podcastService.searchResults.isEmpty && searchText.isEmpty {
                 ContentUnavailableView(
-                    "Search Podcasts",
+                    "podcast.search_empty_title",
                     systemImage: "mic.fill",
-                    description: Text("Search for a podcast by name to browse and transcribe episodes.")
+                    description: Text("podcast.search_empty_description")
                 )
             } else if !podcastService.isSearching && podcastService.searchResults.isEmpty && !searchText.isEmpty {
                 ContentUnavailableView.search(text: searchText)
