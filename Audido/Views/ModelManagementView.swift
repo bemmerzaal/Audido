@@ -10,46 +10,55 @@ struct ModelManagementView: View {
             Section {
                 if let selected = modelManager.selectedModelName,
                    let model = modelManager.availableModels.first(where: { $0.name == selected }) {
-                    LabeledContent("Active Model") {
+                    LabeledContent("settings.active_model") {
                         Text(model.displayName)
                             .fontWeight(.medium)
                     }
                 } else {
-                    LabeledContent("Active Model") {
-                        Text("None")
+                    LabeledContent("settings.active_model") {
+                        Text("settings.none")
                             .foregroundStyle(.secondary)
                     }
                 }
             } header: {
-                Text("Current Model")
+                Text("settings.current_model")
             }
 
             Section {
-                Picker("Microphone", selection: Bindable(audioDeviceManager).selectedDeviceUID) {
-                    Text("System Default").tag(nil as String?)
+                Picker("settings.app_language", selection: Bindable(modelManager).uiLanguage) {
+                    Text("settings.dutch").tag("nl")
+                    Text("settings.english").tag("en")
+                }
+            } header: {
+                Text("settings.language")
+            }
+
+            Section {
+                Picker("settings.microphone", selection: Bindable(audioDeviceManager).selectedDeviceUID) {
+                    Text("settings.system_default").tag(nil as String?)
                     Divider()
                     ForEach(audioDeviceManager.inputDevices) { device in
                         Text(device.name).tag(device.uniqueID as String?)
                     }
                 }
             } header: {
-                Text("Audio Input")
+                Text("settings.audio_input")
             } footer: {
-                Text("Kies de microfoon voor opnames. Je iPhone kan als microfoon dienen via Continuity (zelfde Apple ID, Bluetooth/WiFi aan).")
+                Text("settings.microphone_hint")
             }
 
             Section {
-                Picker("Transcription Language", selection: Bindable(modelManager).selectedLanguage) {
+                Picker("settings.transcription_language", selection: Bindable(modelManager).selectedLanguage) {
                     ForEach(ModelManager.supportedLanguages, id: \.code) { lang in
                         Text(lang.name).tag(lang.code)
                     }
                 }
 
-                Toggle("Conversation Mode", isOn: Bindable(modelManager).conversationMode)
+                Toggle("settings.conversation_mode", isOn: Bindable(modelManager).conversationMode)
             } header: {
-                Text("Transcription")
+                Text("settings.transcription")
             } footer: {
-                Text("Select the language of the audio. Enable Conversation Mode to identify different speakers — the first use downloads a small speaker model (~50 MB).")
+                Text("settings.conversation_hint")
             }
 
             Section {
@@ -65,9 +74,9 @@ struct ModelManagementView: View {
                     )
                 }
             } header: {
-                Text("Available Models")
+                Text("settings.available_models")
             } footer: {
-                Text("Multilingual models support Dutch, English, and 90+ other languages. Larger models are more accurate but use more memory and are slower.")
+                Text("settings.models_hint")
             }
 
             if let error = modelManager.errorMessage {
@@ -142,7 +151,7 @@ struct ModelRow: View {
             } else if model.isDownloaded {
                 HStack(spacing: 8) {
                     if !isSelected {
-                        Button("Select") {
+                        Button("settings.select") {
                             onSelect()
                         }
                         .buttonStyle(.borderedProminent)
@@ -159,7 +168,7 @@ struct ModelRow: View {
                 Button {
                     onDownload()
                 } label: {
-                    Label("Download", systemImage: "arrow.down.circle")
+                    Label("settings.download", systemImage: "arrow.down.circle")
                 }
                 .controlSize(.small)
             }

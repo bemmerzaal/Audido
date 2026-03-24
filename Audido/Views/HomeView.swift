@@ -18,14 +18,14 @@ struct HomeView: View {
                 // Stats tiles
                 HStack(spacing: 16) {
                     StatTile(
-                        title: "Recordings",
+                        title: "home.recordings",
                         value: "\(recordings.count)",
                         icon: "waveform",
                         color: .blue
                     )
 
                     StatTile(
-                        title: "Transcriptions",
+                        title: "home.transcriptions",
                         value: "\(transcriptionCount)",
                         icon: "text.below.photo",
                         color: .green
@@ -41,10 +41,10 @@ struct HomeView: View {
                                 .font(.system(size: 40))
                                 .foregroundStyle(.red)
 
-                            Text("Record")
+                            Text("home.record")
                                 .font(.headline)
 
-                            Text("Microphone recording")
+                            Text("home.microphone_recording")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -61,10 +61,10 @@ struct HomeView: View {
                                 .font(.system(size: 40))
                                 .foregroundStyle(.blue)
 
-                            Text("Meeting")
+                            Text("home.meeting")
                                 .font(.headline)
 
-                            Text("Capture system audio")
+                            Text("home.capture_system_audio")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -80,7 +80,7 @@ struct HomeView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
-                        Text("No model selected. Open Settings to download and select a Whisper model.")
+                        Text("home.no_model")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -95,7 +95,7 @@ struct HomeView: View {
 }
 
 struct StatTile: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     let icon: String
     let color: Color

@@ -18,14 +18,14 @@ struct TranscriptionProgressView: View {
                 Button(role: .destructive) {
                     queue.cancelTask(task)
                 } label: {
-                    Label("Cancel", systemImage: "xmark")
+                    Label("progress.cancel", systemImage: "xmark")
                 }
                 .buttonStyle(.bordered)
             }
         } else {
             VStack(spacing: 16) {
                 ProgressView()
-                Text("Transcribing...")
+                Text("progress.transcribing")
                     .foregroundStyle(.secondary)
                     .font(.caption)
             }

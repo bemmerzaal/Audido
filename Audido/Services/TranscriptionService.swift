@@ -24,11 +24,21 @@ enum TranscriptionError: LocalizedError {
 @Observable
 final class TranscriptionService {
     var isModelLoaded = false
+    var isLoadingModel = false
     private var whisperKit: WhisperKit?
 
     func loadModel(from folder: String) async throws {
-        whisperKit = try await WhisperKit(modelFolder: folder)
-        isModelLoaded = true
+        guard !isLoadingModel else { return }
+        isLoadingModel = true
+        do {
+            let wk = try await WhisperKit(modelFolder: folder)
+            whisperKit = wk
+            isModelLoaded = true
+            isLoadingModel = false
+        } catch {
+            isLoadingModel = false
+            throw error
+        }
     }
 
     func transcribe(
@@ -165,5 +175,6 @@ final class TranscriptionService {
     func unloadModel() {
         whisperKit = nil
         isModelLoaded = false
+        isLoadingModel = false
     }
 }

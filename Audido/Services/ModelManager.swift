@@ -29,6 +29,11 @@ final class ModelManager {
             UserDefaults.standard.set(conversationMode, forKey: "conversationMode")
         }
     }
+    var uiLanguage: String {
+        didSet {
+            UserDefaults.standard.set(uiLanguage, forKey: "uiLanguage")
+        }
+    }
     var isDownloading = false
     var downloadingModelName: String?
     var downloadProgress: Double = 0
@@ -60,6 +65,7 @@ final class ModelManager {
         selectedModelName = UserDefaults.standard.string(forKey: "selectedModelName")
         selectedLanguage = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "nl"
         conversationMode = UserDefaults.standard.bool(forKey: "conversationMode")
+        uiLanguage = UserDefaults.standard.string(forKey: "uiLanguage") ?? "nl"
         refreshModels()
     }
 

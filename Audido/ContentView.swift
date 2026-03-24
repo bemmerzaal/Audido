@@ -44,7 +44,7 @@ struct ContentView: View {
                     } label: {
                         HStack(spacing: 5) {
                             Image(systemName: "record.circle")
-                            Text("Nieuwe opname")
+                            Text("nav.new_recording")
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 9)
@@ -64,7 +64,7 @@ struct ContentView: View {
                     } label: {
                         HStack(spacing: 5) {
                             Image(systemName: "doc.badge.plus")
-                            Text("Upload audio")
+                            Text("nav.upload_audio")
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 9)
@@ -77,7 +77,7 @@ struct ContentView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .help("Importeer een audiobestand (MP3, M4A, WAV, etc.)")
+                    .help("nav.import_help")
                 }
             }
 
@@ -87,7 +87,7 @@ struct ContentView: View {
                 } label: {
                     Image(systemName: "cpu")
                 }
-                .help("Beheer Whisper modellen")
+                .help("settings.manage_models")
             }
         }
         .sheet(isPresented: $showModelManagement) {
@@ -98,7 +98,7 @@ struct ContentView: View {
                 .frame(minWidth: 500, minHeight: 450)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") {
+                        Button("settings.done") {
                             showModelManagement = false
                         }
                     }
@@ -132,7 +132,7 @@ struct ContentView: View {
 
     private var recordModePopover: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Kies opnamemodus")
+            Text("nav.choose_mode")
                 .font(.headline)
                 .padding(.bottom, 4)
 
@@ -145,9 +145,9 @@ struct ContentView: View {
                         .font(.title2)
                         .foregroundStyle(.red)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Microfoon")
+                        Text("nav.microphone")
                             .fontWeight(.medium)
-                        Text("Neem op via je microfoon")
+                        Text("nav.microphone_subtitle")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -169,9 +169,9 @@ struct ContentView: View {
                         .font(.title2)
                         .foregroundStyle(.blue)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Meeting Capture")
+                        Text("sidebar.meeting_capture")
                             .fontWeight(.medium)
-                        Text("Leg systeem audio vast (Teams, Zoom, etc.)")
+                        Text("nav.meeting_subtitle")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

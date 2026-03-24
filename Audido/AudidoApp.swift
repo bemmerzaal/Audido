@@ -53,6 +53,7 @@ struct AudidoApp: App {
                 .environment(audioDeviceManager)
                 .environment(meetingCaptureService)
                 .environment(transcriptionQueue)
+                .environment(\.locale, Locale(identifier: modelManager.uiLanguage))
         }
         .modelContainer(sharedModelContainer)
 

@@ -18,7 +18,7 @@ struct ActiveRecordingView: View {
                     .foregroundStyle(.red)
                     .symbolEffect(.pulse, isActive: audioRecorder.isRecording)
 
-                Text("Recording...")
+                Text("recording.recording")
                     .font(.title2)
                     .fontWeight(.medium)
 
@@ -39,7 +39,7 @@ struct ActiveRecordingView: View {
                 isStopping = true
                 stopRecording()
             } label: {
-                Label(isStopping ? "Stopping..." : "Stop Recording", systemImage: "stop.circle.fill")
+                Label(isStopping ? LocalizedStringKey("recording.stopping") : LocalizedStringKey("recording.stop"), systemImage: "stop.circle.fill")
                     .font(.title3)
             }
             .buttonStyle(.borderedProminent)
@@ -50,7 +50,7 @@ struct ActiveRecordingView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle("Recording")
+        .navigationTitle(Text("recording.recording"))
     }
 
     private func stopRecording() {

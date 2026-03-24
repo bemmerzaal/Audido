@@ -20,11 +20,11 @@ struct MeetingCaptureSetupView: View {
                         .font(.system(size: 48))
                         .foregroundStyle(.blue)
 
-                    Text("Meeting Capture")
+                    Text("meeting.title")
                         .font(.title)
                         .fontWeight(.bold)
 
-                    Text("Record system audio from a meeting app and your microphone")
+                    Text("meeting.subtitle")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -33,12 +33,12 @@ struct MeetingCaptureSetupView: View {
 
                 // Audio source selection
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Audio Source")
+                    Text("meeting.audio_source")
                         .font(.headline)
 
                     Picker("Source", selection: $capture.captureAllSystemAudio) {
-                        Text("All system audio").tag(true)
-                        Text("Specific app").tag(false)
+                        Text("meeting.all_system_audio").tag(true)
+                        Text("meeting.specific_app").tag(false)
                     }
                     .pickerStyle(.radioGroup)
 
@@ -47,13 +47,13 @@ struct MeetingCaptureSetupView: View {
                             HStack {
                                 ProgressView()
                                     .scaleEffect(0.7)
-                                Text("Loading apps...")
+                                Text("meeting.loading_apps")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         } else {
                             Picker("Application", selection: $capture.selectedApp) {
-                                Text("Select an app...").tag(nil as SCRunningApplication?)
+                                Text("meeting.select_app").tag(nil as SCRunningApplication?)
                                 ForEach(captureService.availableApps, id: \.bundleIdentifier) { app in
                                     Text(app.applicationName).tag(app as SCRunningApplication?)
                                 }
@@ -67,14 +67,14 @@ struct MeetingCaptureSetupView: View {
 
                 // Microphone toggle
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Microphone")
+                    Text("meeting.microphone")
                         .font(.headline)
 
-                    Toggle("Include microphone (your voice)", isOn: $capture.includeMicrophone)
+                    Toggle("meeting.include_microphone", isOn: $capture.includeMicrophone)
                         .toggleStyle(.switch)
 
                     if captureService.includeMicrophone {
-                        Text("Your voice will be mixed with the meeting audio")
+                        Text("meeting.mic_hint")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -103,7 +103,7 @@ struct MeetingCaptureSetupView: View {
                         ProgressView()
                             .controlSize(.small)
                     } else {
-                        Label("Start Meeting Capture", systemImage: "record.circle")
+                        Label("meeting.start_capture", systemImage: "record.circle")
                             .font(.title3)
                     }
                 }
@@ -115,7 +115,7 @@ struct MeetingCaptureSetupView: View {
             .padding(24)
         }
         .frame(maxWidth: 500)
-        .navigationTitle("Meeting Capture")
+        .navigationTitle(Text("meeting.title"))
         .task {
             await captureService.fetchAvailableApps()
         }
@@ -151,7 +151,7 @@ struct ActiveMeetingCaptureView: View {
                     .foregroundStyle(.blue)
                     .symbolEffect(.pulse, isActive: true)
 
-                Text("Meeting Capture Active")
+                Text("meeting.active")
                     .font(.title2)
                     .fontWeight(.medium)
 
@@ -165,7 +165,7 @@ struct ActiveMeetingCaptureView: View {
                 HStack {
                     Image(systemName: "speaker.wave.2")
                         .frame(width: 24)
-                    Text("System")
+                    Text("meeting.system_label")
                         .font(.caption)
                         .frame(width: 50, alignment: .leading)
                     AudioLevelIndicator(level: captureService.systemAudioLevel, barCount: 30)
@@ -176,7 +176,7 @@ struct ActiveMeetingCaptureView: View {
                     HStack {
                         Image(systemName: "mic")
                             .frame(width: 24)
-                        Text("Mic")
+                        Text("meeting.mic_label")
                             .font(.caption)
                             .frame(width: 50, alignment: .leading)
                         AudioLevelIndicator(level: captureService.micAudioLevel, barCount: 30)
@@ -190,7 +190,7 @@ struct ActiveMeetingCaptureView: View {
             Button {
                 Task { await stopCapture() }
             } label: {
-                Label("Stop Meeting Capture", systemImage: "stop.circle.fill")
+                Label("meeting.stop_capture", systemImage: "stop.circle.fill")
                     .font(.title3)
             }
             .buttonStyle(.borderedProminent)
@@ -200,7 +200,7 @@ struct ActiveMeetingCaptureView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle("Meeting Capture")
+        .navigationTitle(Text("meeting.title"))
     }
 
     private func stopCapture() async {

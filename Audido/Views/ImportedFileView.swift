@@ -54,7 +54,7 @@ struct ImportedFileView: View {
             if isConverting {
                 VStack(spacing: 12) {
                     ProgressView()
-                    Text("Converting audio to WAV...")
+                    Text("import.converting")
                         .foregroundStyle(.secondary)
                         .font(.caption)
                 }
@@ -77,29 +77,35 @@ struct ImportedFileView: View {
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
 
-                    if transcriptionService.isModelLoaded {
+                    if transcriptionService.isLoadingModel {
+                        VStack(spacing: 12) {
+                            ProgressView()
+                            Text("transcription.model_loading")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    } else if transcriptionService.isModelLoaded {
                         HStack(spacing: 12) {
                             Picker("Mode", selection: $speakerMode) {
-                                ForEach(SpeakerMode.allCases, id: \.self) { mode in
-                                    Text(mode.rawValue).tag(mode)
-                                }
+                                Text("transcription.single_speaker").tag(SpeakerMode.single)
+                                Text("transcription.multi_speaker").tag(SpeakerMode.multi)
                             }
                             .pickerStyle(.menu)
                             .frame(width: 180)
 
-                            Button("Transcribe") {
+                            Button("transcription.transcribe") {
                                 Task { await transcribe() }
                             }
                             .buttonStyle(.borderedProminent)
                         }
 
                         Text(speakerMode == .multi
-                             ? "Identifies different speakers in the conversation."
-                             : "Transcribes all audio as a single speaker.")
+                             ? "transcription.multi_hint"
+                             : "transcription.single_hint")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
-                        Text("Download and select a model in Settings to transcribe.")
+                        Text("transcription.no_model")
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
@@ -108,14 +114,22 @@ struct ImportedFileView: View {
             }
         }
         .navigationTitle(fileURL.deletingPathExtension().lastPathComponent)
-        .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button("OK") { errorMessage = nil }
+        .alert("error.title", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button("error.ok") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
         }
         .onAppear {
             setupPlayer()
             loadExistingRecording()
+        }
+        .task {
+            // Start model loading as soon as this view appears, in case ContentView's
+            // startup task hasn't finished yet (race condition on fresh install).
+            guard !transcriptionService.isModelLoaded,
+                  !transcriptionService.isLoadingModel,
+                  let folder = modelManager.selectedModelFolder else { return }
+            try? await transcriptionService.loadModel(from: folder)
         }
         .onDisappear {
             stopPlayback()
@@ -159,7 +173,7 @@ struct ImportedFileView: View {
                     .lineLimit(1)
 
                 let ext = fileURL.pathExtension.uppercased()
-                Text("Imported \(ext) file")
+                Text(String(format: String(localized: "import.imported_file"), ext))
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -271,7 +285,7 @@ struct ImportedFileView: View {
         } catch {
             isConverting = false
             isTranscribing = false
-            errorMessage = "Failed: \(error.localizedDescription)"
+            errorMessage = String(format: String(localized: "import.failed"), error.localizedDescription)
         }
     }
 

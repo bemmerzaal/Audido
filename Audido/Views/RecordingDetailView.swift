@@ -56,30 +56,36 @@ struct RecordingDetailView: View {
                             .font(.system(size: 48))
                             .foregroundStyle(.secondary)
 
-                        if transcriptionService.isModelLoaded {
+                        if transcriptionService.isLoadingModel {
+                            VStack(spacing: 12) {
+                                ProgressView()
+                                Text("transcription.model_loading")
+                                    .foregroundStyle(.secondary)
+                                    .font(.caption)
+                            }
+                        } else if transcriptionService.isModelLoaded {
                             // Speaker mode picker + Transcribe button
                             HStack(spacing: 12) {
                                 Picker("Mode", selection: $speakerMode) {
-                                    ForEach(SpeakerMode.allCases, id: \.self) { mode in
-                                        Text(mode.rawValue).tag(mode)
-                                    }
+                                    Text("transcription.single_speaker").tag(SpeakerMode.single)
+                                    Text("transcription.multi_speaker").tag(SpeakerMode.multi)
                                 }
                                 .pickerStyle(.menu)
                                 .frame(width: 180)
 
-                                Button("Transcribe") {
+                                Button("transcription.transcribe") {
                                     transcribe()
                                 }
                                 .buttonStyle(.borderedProminent)
                             }
 
                             Text(speakerMode == .multi
-                                 ? "Identifies different speakers in the conversation."
-                                 : "Transcribes all audio as a single speaker.")
+                                 ? "transcription.multi_hint"
+                                 : "transcription.single_hint")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         } else {
-                            Text("Download and select a model in Settings to transcribe.")
+                            Text("transcription.no_model")
                                 .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
                         }
@@ -111,9 +117,8 @@ struct RecordingDetailView: View {
                 Button {
                     withAnimation { showInspector.toggle() }
                 } label: {
-                    Label("Inspector", systemImage: "sidebar.trailing")
+                    Label("transcription.inspector", systemImage: "sidebar.trailing")
                 }
-                .help("Toggle inspector panel")
             }
         }
         .alert("Error", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
@@ -121,10 +126,16 @@ struct RecordingDetailView: View {
         } message: {
             Text(errorMessage ?? "")
         }
-        .alert("AI Summarize Not Available", isPresented: $showUnavailableAlert) {
-            Button("OK") {}
+        .alert(Text("transcription.ai_unavailable"), isPresented: $showUnavailableAlert) {
+            Button("error.ok") {}
         } message: {
             Text(summaryService.unavailableReason ?? "Apple Intelligence is not available on this device.")
+        }
+        .task {
+            guard !transcriptionService.isModelLoaded,
+                  !transcriptionService.isLoadingModel,
+                  let folder = modelManager.selectedModelFolder else { return }
+            try? await transcriptionService.loadModel(from: folder)
         }
         .onChange(of: recording.id) {
             stopPlayback()
@@ -267,7 +278,7 @@ struct RecordingDetailView: View {
             // AI features (only when transcription exists)
             if !recording.transcriptionText.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("AI Features")
+                    Text("transcription.ai_summary")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -287,7 +298,7 @@ struct RecordingDetailView: View {
                             showUnavailableAlert = true
                         }
                     } label: {
-                        Label(recording.summaryText != nil ? "Regenerate Summary" : "AI Summary",
+                        Label(recording.summaryText != nil ? "transcription.regenerate_summary" : "transcription.ai_summary",
                               systemImage: "apple.intelligence")
                             .frame(maxWidth: .infinity)
                     }
@@ -313,7 +324,7 @@ struct RecordingDetailView: View {
                             showUnavailableAlert = true
                         }
                     } label: {
-                        Label(recording.actionItemsText != nil ? "Regenerate Actions" : "Action Items",
+                        Label(recording.actionItemsText != nil ? "transcription.regenerate_actions" : "transcription.action_items",
                               systemImage: "checklist")
                             .frame(maxWidth: .infinity)
                     }
@@ -329,7 +340,7 @@ struct RecordingDetailView: View {
 
             // Font size
             VStack(alignment: .leading, spacing: 8) {
-                Text("Font Size")
+                Text("transcription.font_size")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -359,7 +370,7 @@ struct RecordingDetailView: View {
                         copied = false
                     }
                 } label: {
-                    Label(copied ? "Copied!" : "Copy Text", systemImage: copied ? "checkmark" : "doc.on.doc")
+                    Label(copied ? String(localized: "transcription.copied") : String(localized: "transcription.copy_text"), systemImage: copied ? "checkmark" : "doc.on.doc")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -369,7 +380,7 @@ struct RecordingDetailView: View {
                 Button {
                     exportToFile()
                 } label: {
-                    Label("Export as TXT", systemImage: "square.and.arrow.up")
+                    Label("transcription.export_txt", systemImage: "square.and.arrow.up")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -380,7 +391,7 @@ struct RecordingDetailView: View {
 
                 // Word count info
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Statistics")
+                    Text("transcription.statistics")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -388,7 +399,7 @@ struct RecordingDetailView: View {
                     let chars = recording.transcriptionText.count
 
                     HStack {
-                        Text("Words:")
+                        Text("transcription.words")
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text("\(words)")
@@ -397,7 +408,7 @@ struct RecordingDetailView: View {
                     .font(.caption)
 
                     HStack {
-                        Text("Characters:")
+                        Text("transcription.characters")
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text("\(chars)")

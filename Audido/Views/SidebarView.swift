@@ -17,16 +17,16 @@ struct SidebarView: View {
                 Label("Home", systemImage: "house")
                     .tag(SidebarItem.home)
 
-                Label("Alle items", systemImage: "list.bullet.rectangle")
+                Label("sidebar.all_items", systemImage: "list.bullet.rectangle")
                     .badge(recordings.count)
                     .tag(SidebarItem.allItems)
 
-                Label("Zoek podcasts", systemImage: "apple.podcasts.pages")
+                Label("sidebar.podcasts", systemImage: "apple.podcasts.pages")
                     .tag(SidebarItem.podcasts)
             }
 
             if transcriptionQueue.hasActiveTasks {
-                Section("Transcripties") {
+                Section("home.transcriptions") {
                     ForEach(transcriptionQueue.activeTasks) { task in
                         TranscriptionQueueRow(task: task)
                             .tag(SidebarItem.recording(task.recording))
@@ -35,7 +35,7 @@ struct SidebarView: View {
             }
 
             if !recentRecordings.isEmpty {
-                Section("Recent") {
+                Section("sidebar.recent") {
                     ForEach(recentRecordings) { recording in
                         RecordingRow(recording: recording)
                             .tag(SidebarItem.recording(recording))
@@ -43,7 +43,7 @@ struct SidebarView: View {
                                 Button {
                                     selection = .recording(recording)
                                 } label: {
-                                    Label("Open", systemImage: "arrow.up.right.square")
+                                    Label("sidebar.open", systemImage: "arrow.up.right.square")
                                 }
 
                                 Divider()
@@ -54,7 +54,7 @@ struct SidebarView: View {
                                     }
                                     deleteRecording(recording)
                                 } label: {
-                                    Label("Verwijder", systemImage: "trash")
+                                    Label("sidebar.delete", systemImage: "trash")
                                 }
                             }
                     }
@@ -90,7 +90,7 @@ struct TranscriptionQueueRow: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else if task.state == .queued {
-                    Text("In wachtrij")
+                    Text("sidebar.in_queue")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -106,7 +106,7 @@ struct TranscriptionQueueRow: View {
             Button(role: .destructive) {
                 queue.cancelTask(task)
             } label: {
-                Label("Annuleer", systemImage: "xmark.circle")
+                Label("sidebar.cancel", systemImage: "xmark.circle")
             }
         }
     }
