@@ -4,6 +4,7 @@ import SwiftData
 struct SidebarView: View {
     @Query(sort: \Recording.createdAt, order: .reverse) private var recordings: [Recording]
     @Environment(TranscriptionQueue.self) private var transcriptionQueue
+    @Environment(\.modelContext) private var modelContext
     @Binding var selection: SidebarItem?
 
     private var recentRecordings: [Recording] {
@@ -16,16 +17,16 @@ struct SidebarView: View {
                 Label("Home", systemImage: "house")
                     .tag(SidebarItem.home)
 
-                Label("All Items", systemImage: "list.bullet.rectangle")
+                Label("Alle items", systemImage: "list.bullet.rectangle")
                     .badge(recordings.count)
                     .tag(SidebarItem.allItems)
 
-                Label("Search podcasts", systemImage: "apple.podcasts.pages")
+                Label("Zoek podcasts", systemImage: "apple.podcasts.pages")
                     .tag(SidebarItem.podcasts)
             }
 
             if transcriptionQueue.hasActiveTasks {
-                Section("Transcriptions") {
+                Section("Transcripties") {
                     ForEach(transcriptionQueue.activeTasks) { task in
                         TranscriptionQueueRow(task: task)
                             .tag(SidebarItem.recording(task.recording))
@@ -34,14 +35,39 @@ struct SidebarView: View {
             }
 
             if !recentRecordings.isEmpty {
-                Section("Recents") {
+                Section("Recent") {
                     ForEach(recentRecordings) { recording in
                         RecordingRow(recording: recording)
                             .tag(SidebarItem.recording(recording))
+                            .contextMenu {
+                                Button {
+                                    selection = .recording(recording)
+                                } label: {
+                                    Label("Open", systemImage: "arrow.up.right.square")
+                                }
+
+                                Divider()
+
+                                Button(role: .destructive) {
+                                    if case .recording(let sel) = selection, sel.id == recording.id {
+                                        selection = .home
+                                    }
+                                    deleteRecording(recording)
+                                } label: {
+                                    Label("Verwijder", systemImage: "trash")
+                                }
+                            }
                     }
                 }
             }
         }
+    }
+
+    private func deleteRecording(_ recording: Recording) {
+        if recording.sourceType == .recording {
+            try? FileManager.default.removeItem(at: recording.fileURL)
+        }
+        modelContext.delete(recording)
     }
 }
 
@@ -77,8 +103,10 @@ struct TranscriptionQueueRow: View {
         }
         .padding(.vertical, 2)
         .contextMenu {
-            Button("Cancel", role: .destructive) {
+            Button(role: .destructive) {
                 queue.cancelTask(task)
+            } label: {
+                Label("Annuleer", systemImage: "xmark.circle")
             }
         }
     }

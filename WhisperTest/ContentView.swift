@@ -29,7 +29,7 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             SidebarView(selection: $selection)
-                .navigationSplitViewColumnWidth(min: 220, ideal: 280)
+                .navigationSplitViewColumnWidth(min: 250, ideal: 310)
         } detail: {
             VStack(spacing: 0) {
                 Divider()

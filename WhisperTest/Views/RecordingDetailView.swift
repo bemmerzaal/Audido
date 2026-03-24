@@ -102,7 +102,7 @@ struct RecordingDetailView: View {
                 Divider()
 
                 inspectorPanel
-                    .frame(width: 200)
+                    .frame(width: 300)
             }
         }
         .navigationTitle($recording.title)
@@ -262,14 +262,6 @@ struct RecordingDetailView: View {
                 Text("Options")
                     .font(.headline)
                 Spacer()
-                Button {
-                    withAnimation { showInspector = false }
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .help("Close inspector")
             }
 
             // AI features (only when transcription exists)
@@ -300,6 +292,8 @@ struct RecordingDetailView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .buttonBorderShape(.capsule)
                     .tint(.purple)
                     .disabled(isSummarizing)
 
@@ -324,6 +318,8 @@ struct RecordingDetailView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .buttonBorderShape(.capsule)
                     .tint(.orange)
                     .disabled(isExtractingActions)
                 }
@@ -367,6 +363,8 @@ struct RecordingDetailView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
+                .controlSize(.large)
+                .buttonBorderShape(.capsule)
 
                 Button {
                     exportToFile()
@@ -375,6 +373,8 @@ struct RecordingDetailView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
+                .controlSize(.large)
+                .buttonBorderShape(.capsule)
 
                 Divider()
 

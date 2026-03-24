@@ -128,15 +128,21 @@ struct RecordingsListView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {
-                                    Button("Open") {
+                                    Button {
                                         onSelectRecording(recording)
+                                    } label: {
+                                        Label("Open", systemImage: "arrow.up.right.square")
                                     }
+
                                     Divider()
-                                    Button("Delete", role: .destructive) {
+
+                                    Button(role: .destructive) {
                                         if selectedRecording?.id == recording.id {
                                             selectedRecording = nil
                                         }
                                         deleteRecording(recording)
+                                    } label: {
+                                        Label("Verwijder", systemImage: "trash")
                                     }
                                 }
 

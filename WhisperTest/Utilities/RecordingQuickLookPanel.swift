@@ -72,6 +72,8 @@ struct RecordingQuickLookPanel: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .buttonBorderShape(.capsule)
                     .padding()
                 }
             }
