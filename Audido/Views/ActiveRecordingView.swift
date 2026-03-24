@@ -28,10 +28,9 @@ struct ActiveRecordingView: View {
                     .contentTransition(.numericText())
             }
 
-            // Audio level — 20 bars instead of 40
+            // Audio level
             AudioLevelIndicator(level: audioRecorder.audioLevel, barCount: 20)
-                .frame(height: 32)
-                .padding(.horizontal, 48)
+                .frame(width: 240, height: 20)
 
             // Stop button — disabled while stopping to prevent double-click
             Button {

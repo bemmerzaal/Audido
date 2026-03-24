@@ -8,6 +8,7 @@ struct RecordingsListView: View {
     @State private var filterType: FilterType = .all
     @State private var selectedRecording: Recording?
     @State private var showPanel = true
+    @State private var recordingToDelete: Recording?
     var onSelectRecording: (Recording) -> Void
 
     enum FilterType: String, CaseIterable {
@@ -146,10 +147,7 @@ struct RecordingsListView: View {
                                     Divider()
 
                                     Button(role: .destructive) {
-                                        if selectedRecording?.id == recording.id {
-                                            selectedRecording = nil
-                                        }
-                                        deleteRecording(recording)
+                                        recordingToDelete = recording
                                     } label: {
                                         Label("sidebar.delete", systemImage: "trash")
                                     }
@@ -183,6 +181,25 @@ struct RecordingsListView: View {
             if let sel = selectedRecording, !recordings.contains(where: { $0.id == sel.id }) {
                 selectedRecording = nil
             }
+        }
+        .alert(
+            Text(String(format: String(localized: "delete.confirm_title"), recordingToDelete?.title ?? "")),
+            isPresented: Binding(get: { recordingToDelete != nil }, set: { if !$0 { recordingToDelete = nil } })
+        ) {
+            Button("delete.confirm_button", role: .destructive) {
+                if let recording = recordingToDelete {
+                    if selectedRecording?.id == recording.id {
+                        selectedRecording = nil
+                    }
+                    deleteRecording(recording)
+                }
+                recordingToDelete = nil
+            }
+            Button("delete.cancel_button", role: .cancel) {
+                recordingToDelete = nil
+            }
+        } message: {
+            Text("delete.confirm_message")
         }
     }
 

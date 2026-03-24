@@ -6,6 +6,7 @@ struct SidebarView: View {
     @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Environment(\.modelContext) private var modelContext
     @Binding var selection: SidebarItem?
+    @State private var recordingToDelete: Recording?
 
     private var recentRecordings: [Recording] {
         Array(recordings.prefix(5))
@@ -49,10 +50,7 @@ struct SidebarView: View {
                                 Divider()
 
                                 Button(role: .destructive) {
-                                    if case .recording(let sel) = selection, sel.id == recording.id {
-                                        selection = .home
-                                    }
-                                    deleteRecording(recording)
+                                    recordingToDelete = recording
                                 } label: {
                                     Label("sidebar.delete", systemImage: "trash")
                                 }
@@ -60,6 +58,25 @@ struct SidebarView: View {
                     }
                 }
             }
+        }
+        .alert(
+            Text(String(format: String(localized: "delete.confirm_title"), recordingToDelete?.title ?? "")),
+            isPresented: Binding(get: { recordingToDelete != nil }, set: { if !$0 { recordingToDelete = nil } })
+        ) {
+            Button("delete.confirm_button", role: .destructive) {
+                if let recording = recordingToDelete {
+                    if case .recording(let sel) = selection, sel.id == recording.id {
+                        selection = .home
+                    }
+                    deleteRecording(recording)
+                }
+                recordingToDelete = nil
+            }
+            Button("delete.cancel_button", role: .cancel) {
+                recordingToDelete = nil
+            }
+        } message: {
+            Text("delete.confirm_message")
         }
     }
 

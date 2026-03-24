@@ -1554,6 +1554,30 @@
         }
       }
     },
+    "delete.confirm_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete \"%@\"?" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "\"%@\" verwijderen?" } }
+      }
+    },
+    "delete.confirm_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This will permanently delete the recording and its transcription. This action cannot be undone." } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "De opname en bijbehorende transcriptie worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt." } }
+      }
+    },
+    "delete.confirm_button" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Verwijderen" } }
+      }
+    },
+    "delete.cancel_button" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Annuleren" } }
+      }
+    },
     "sidebar.home" : {
       "localizations" : {
         "en" : {
