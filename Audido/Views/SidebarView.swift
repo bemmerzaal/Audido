@@ -133,25 +133,26 @@ struct RecordingRow: View {
     let recording: Recording
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
                 Image(systemName: recording.sourceIcon)
-                    .font(.caption2)
+                    .font(.body)
                     .foregroundStyle(iconColor)
 
                 Text(recording.title)
-                    .fontWeight(.medium)
+                    .font(.headline)
+                    .fontWeight(.semibold)
                     .lineLimit(1)
 
                 Spacer()
 
                 if recording.isTranscribing {
                     ProgressView()
-                        .scaleEffect(0.5)
+                        .scaleEffect(0.6)
                 } else if !recording.transcriptionText.isEmpty {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
-                        .font(.caption)
+                        .font(.callout)
                 }
             }
 
@@ -164,7 +165,7 @@ struct RecordingRow: View {
                     Text(recording.sourceLabel)
                 }
             }
-            .font(.caption)
+            .font(.subheadline)
             .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)

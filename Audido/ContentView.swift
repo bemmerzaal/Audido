@@ -224,7 +224,9 @@ struct ContentView: View {
                     selection = .recording(recording)
                 })
             case .recording(let recording):
-                RecordingDetailView(recording: recording)
+                RecordingDetailView(recording: recording, onBack: {
+                    selection = .allItems
+                })
             case .podcasts:
                 PodcastSearchView(onSelectPodcast: { podcast in
                     selection = .podcastDetail(podcast)

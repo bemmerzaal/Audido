@@ -162,29 +162,28 @@ struct ActiveMeetingCaptureView: View {
 
             // Audio levels
             VStack(spacing: 12) {
-                HStack {
+                HStack(spacing: 8) {
                     Image(systemName: "speaker.wave.2")
-                        .frame(width: 24)
+                        .frame(width: 20)
                     Text("meeting.system_label")
                         .font(.caption)
-                        .frame(width: 50, alignment: .leading)
-                    AudioLevelIndicator(level: captureService.systemAudioLevel, barCount: 30)
-                        .frame(height: 20)
+                        .frame(width: 44, alignment: .leading)
+                    AudioLevelIndicator(level: captureService.systemAudioLevel, barCount: 20)
+                        .frame(width: 240, height: 20)
                 }
 
                 if captureService.includeMicrophone {
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: "mic")
-                            .frame(width: 24)
+                            .frame(width: 20)
                         Text("meeting.mic_label")
                             .font(.caption)
-                            .frame(width: 50, alignment: .leading)
-                        AudioLevelIndicator(level: captureService.micAudioLevel, barCount: 30)
-                            .frame(height: 20)
+                            .frame(width: 44, alignment: .leading)
+                        AudioLevelIndicator(level: captureService.micAudioLevel, barCount: 20)
+                            .frame(width: 240, height: 20)
                     }
                 }
             }
-            .padding(.horizontal, 48)
 
             // Stop button
             Button {

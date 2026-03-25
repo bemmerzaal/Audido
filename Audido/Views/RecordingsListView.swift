@@ -118,23 +118,33 @@ struct RecordingsListView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 1) {
+                        LazyVStack(spacing: 8) {
                             ForEach(filteredRecordings) { recording in
                                 Button {
                                     selectedRecording = recording
                                     showPanel = true
                                 } label: {
                                     RecordingRow(recording: recording)
-                                        .padding(.horizontal)
-                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity, alignment: .leading)
-                                        .contentShape(Rectangle())
+                                        .contentShape(RoundedRectangle(cornerRadius: 12))
                                         .background(
-                                            selectedRecording?.id == recording.id && showPanel
-                                                ? Color.accentColor.opacity(0.1)
-                                                : Color.clear
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(selectedRecording?.id == recording.id && showPanel
+                                                    ? Color.accentColor.opacity(0.08)
+                                                    : Color(NSColor.controlBackgroundColor))
+                                                .shadow(color: .black.opacity(0.06), radius: 3, x: 0, y: 1)
                                         )
-                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .strokeBorder(
+                                                    selectedRecording?.id == recording.id && showPanel
+                                                        ? Color.accentColor.opacity(0.4)
+                                                        : Color(NSColor.separatorColor).opacity(0.4),
+                                                    lineWidth: 1
+                                                )
+                                        )
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {
@@ -152,11 +162,10 @@ struct RecordingsListView: View {
                                         Label("sidebar.delete", systemImage: "trash")
                                     }
                                 }
-
-                                Divider()
-                                    .padding(.leading)
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
                     }
                 }
             }

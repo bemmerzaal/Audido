@@ -89,6 +89,8 @@ struct HomeView: View {
                 }
             }
             .padding(24)
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
         }
         .navigationTitle("home.nav_title")
     }

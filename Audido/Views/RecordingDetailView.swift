@@ -6,6 +6,7 @@ import SwiftData
 
 struct RecordingDetailView: View {
     @Bindable var recording: Recording
+    var onBack: (() -> Void)? = nil
     @Environment(TranscriptionService.self) private var transcriptionService
     @Environment(TranscriptionQueue.self) private var transcriptionQueue
     @Environment(ModelManager.self) private var modelManager
@@ -120,6 +121,15 @@ struct RecordingDetailView: View {
         }
         .navigationTitle($recording.title)
         .toolbar {
+            if let onBack {
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        onBack()
+                    } label: {
+                        Label("sidebar.all_items", systemImage: "chevron.left")
+                    }
+                }
+            }
             ToolbarItem(placement: .automatic) {
                 Button {
                     withAnimation { showInspector.toggle() }
