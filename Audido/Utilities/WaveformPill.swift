@@ -35,14 +35,14 @@ struct WaveformPill: View {
     }
 }
 
-// MARK: - Pulsing red dot
+// MARK: - Pulsing recording dot
 
 private struct PulsingDot: View {
     @State private var pulsing = false
 
     var body: some View {
         Circle()
-            .fill(.red)
+            .fill(Color.accentColor)
             .frame(width: 10, height: 10)
             .scaleEffect(pulsing ? 1.3 : 1.0)
             .opacity(pulsing ? 0.65 : 1.0)
@@ -89,7 +89,7 @@ private struct WaveformBars: View {
                     let rect = CGRect(x: x, y: midY - halfH, width: barW, height: halfH * 2)
                     let path = Path(roundedRect: rect, cornerRadius: 2)
                     let alpha: Double = effective > 0.02 ? 1.0 : 0.25
-                    context.fill(path, with: .color(Color.teal.opacity(alpha)))
+                    context.fill(path, with: .color(Color.accentColor.opacity(alpha)))
                 }
             }
         }
