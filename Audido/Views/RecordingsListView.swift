@@ -9,6 +9,9 @@ struct RecordingsListView: View {
     @State private var selectedRecording: Recording?
     @State private var showPanel = true
     @State private var recordingToDelete: Recording?
+    @State private var isSelectMode = false
+    @State private var selectedIDs = Set<PersistentIdentifier>()
+    @State private var showBulkDeleteConfirm = false
     var onSelectRecording: (Recording) -> Void
 
     enum FilterType: String, CaseIterable {
@@ -63,43 +66,83 @@ struct RecordingsListView: View {
             // MARK: - List column
             VStack(alignment: .leading, spacing: 0) {
                 // Search + filter bar — always anchored at top
-                HStack(spacing: 12) {
-                    Picker("list.filter", selection: $filterType) {
-                        ForEach(FilterType.allCases, id: \.self) { type in
-                            Text(type.titleKey).tag(type)
+                HStack(spacing: 10) {
+                    // 1. Select / Done button — uiterst links
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isSelectMode.toggle()
+                            if !isSelectMode { selectedIDs.removeAll() }
                         }
+                    } label: {
+                        Text(isSelectMode ? LocalizedStringKey("settings.done") : LocalizedStringKey("list.select"))
+                            .font(.callout)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 5)
+                            .background(Color(NSColor.controlBackgroundColor))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color(NSColor.separatorColor), lineWidth: 1))
                     }
-                    .pickerStyle(.segmented)
+                    .buttonStyle(.plain)
+
+                    if !isSelectMode {
+                        // 2. Segmented filter (label komt van de Picker)
+                        Picker("list.filter", selection: $filterType) {
+                            ForEach(FilterType.allCases, id: \.self) { type in
+                                Text(type.titleKey).tag(type)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .fixedSize()
+                    } else {
+                        // In selectiemodus: selecteer-alles knop
+                        Button {
+                            if selectedIDs.count == filteredRecordings.count {
+                                selectedIDs.removeAll()
+                            } else {
+                                selectedIDs = Set(filteredRecordings.map { $0.persistentModelID })
+                            }
+                        } label: {
+                            Text(selectedIDs.count == filteredRecordings.count
+                                 ? LocalizedStringKey("list.deselect_all")
+                                 : LocalizedStringKey("list.select_all"))
+                                .font(.callout)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 5)
+                                .background(Color(NSColor.controlBackgroundColor))
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(Color(NSColor.separatorColor), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
 
                     Spacer()
 
-                    // Inline search field
-                    HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundStyle(.secondary)
-                            .font(.callout)
-                        TextField("list.search_placeholder", text: $searchText)
-                            .textFieldStyle(.plain)
-                            .frame(width: 220)
-                        if !searchText.isEmpty {
-                            Button {
-                                searchText = ""
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                                    .font(.callout)
+                    // Search field — alleen buiten selectiemodus
+                    if !isSelectMode {
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                                .font(.callout)
+                            TextField("list.search_placeholder", text: $searchText)
+                                .textFieldStyle(.plain)
+                                .frame(width: 180)
+                            if !searchText.isEmpty {
+                                Button {
+                                    searchText = ""
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.secondary)
+                                        .font(.callout)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color(NSColor.controlBackgroundColor))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Color(NSColor.separatorColor), lineWidth: 0.5))
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color(NSColor.controlBackgroundColor))
-                    .clipShape(Capsule())
-                    .overlay(
-                        Capsule()
-                            .stroke(Color(NSColor.separatorColor), lineWidth: 0.5)
-                    )
                 }
                 .padding()
 
@@ -120,49 +163,94 @@ struct RecordingsListView: View {
                     ScrollView {
                         LazyVStack(spacing: 8) {
                             ForEach(filteredRecordings) { recording in
+                                let isChecked = selectedIDs.contains(recording.persistentModelID)
                                 Button {
-                                    selectedRecording = recording
-                                    showPanel = true
+                                    if isSelectMode {
+                                        if isChecked {
+                                            selectedIDs.remove(recording.persistentModelID)
+                                        } else {
+                                            selectedIDs.insert(recording.persistentModelID)
+                                        }
+                                    } else {
+                                        selectedRecording = recording
+                                        showPanel = true
+                                    }
                                 } label: {
-                                    RecordingRow(recording: recording)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 12)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .contentShape(RoundedRectangle(cornerRadius: 12))
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(selectedRecording?.id == recording.id && showPanel
+                                    HStack(spacing: 12) {
+                                        if isSelectMode {
+                                            Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
+                                                .font(.title3)
+                                                .foregroundStyle(isChecked ? Color.accentColor : Color.secondary)
+                                                .transition(.scale.combined(with: .opacity))
+                                        }
+                                        RecordingRow(recording: recording)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(RoundedRectangle(cornerRadius: 12))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(isChecked
+                                                ? Color.accentColor.opacity(0.10)
+                                                : (selectedRecording?.id == recording.id && showPanel && !isSelectMode
                                                     ? Color.accentColor.opacity(0.08)
-                                                    : Color(NSColor.controlBackgroundColor))
-                                                .shadow(color: .black.opacity(0.06), radius: 3, x: 0, y: 1)
-                                        )
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .strokeBorder(
-                                                    selectedRecording?.id == recording.id && showPanel
+                                                    : Color(NSColor.controlBackgroundColor)))
+                                            .shadow(color: .black.opacity(0.06), radius: 3, x: 0, y: 1)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .strokeBorder(
+                                                isChecked
+                                                    ? Color.accentColor.opacity(0.5)
+                                                    : (selectedRecording?.id == recording.id && showPanel && !isSelectMode
                                                         ? Color.accentColor.opacity(0.4)
-                                                        : Color(NSColor.separatorColor).opacity(0.4),
-                                                    lineWidth: 1
-                                                )
-                                        )
+                                                        : Color(NSColor.separatorColor).opacity(0.4)),
+                                                lineWidth: 1
+                                            )
+                                    )
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {
-                                    Button {
-                                        onSelectRecording(recording)
-                                    } label: {
-                                        Label("sidebar.open", systemImage: "arrow.up.right.square")
-                                    }
-
-                                    Divider()
-
-                                    Button(role: .destructive) {
-                                        recordingToDelete = recording
-                                    } label: {
-                                        Label("sidebar.delete", systemImage: "trash")
+                                    if !isSelectMode {
+                                        Button {
+                                            onSelectRecording(recording)
+                                        } label: {
+                                            Label("sidebar.open", systemImage: "arrow.up.right.square")
+                                        }
+                                        Divider()
+                                        Button(role: .destructive) {
+                                            recordingToDelete = recording
+                                        } label: {
+                                            Label("sidebar.delete", systemImage: "trash")
+                                        }
                                     }
                                 }
                             }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                    }
+
+                    // Bulk delete bar
+                    if isSelectMode {
+                        Divider()
+                        HStack {
+                            Text(selectedIDs.isEmpty
+                                ? "Niets geselecteerd"
+                                : "\(selectedIDs.count) geselecteerd")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button(role: .destructive) {
+                                showBulkDeleteConfirm = true
+                            } label: {
+                                Label("Verwijder \(selectedIDs.count)", systemImage: "trash")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.red)
+                            .controlSize(.small)
+                            .disabled(selectedIDs.isEmpty)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
@@ -191,24 +279,39 @@ struct RecordingsListView: View {
                 selectedRecording = nil
             }
         }
+        // Single delete confirmation
         .alert(
             Text(String(format: String(localized: "delete.confirm_title"), recordingToDelete?.title ?? "")),
             isPresented: Binding(get: { recordingToDelete != nil }, set: { if !$0 { recordingToDelete = nil } })
         ) {
             Button("delete.confirm_button", role: .destructive) {
                 if let recording = recordingToDelete {
-                    if selectedRecording?.id == recording.id {
-                        selectedRecording = nil
-                    }
+                    if selectedRecording?.id == recording.id { selectedRecording = nil }
                     deleteRecording(recording)
                 }
                 recordingToDelete = nil
             }
-            Button("delete.cancel_button", role: .cancel) {
-                recordingToDelete = nil
-            }
+            Button("delete.cancel_button", role: .cancel) { recordingToDelete = nil }
         } message: {
             Text("delete.confirm_message")
+        }
+        // Bulk delete confirmation
+        .alert(
+            Text("\(selectedIDs.count) opnames verwijderen?"),
+            isPresented: $showBulkDeleteConfirm
+        ) {
+            Button("delete.confirm_button", role: .destructive) {
+                let toDelete = recordings.filter { selectedIDs.contains($0.persistentModelID) }
+                if let sel = selectedRecording, toDelete.contains(where: { $0.id == sel.id }) {
+                    selectedRecording = nil
+                }
+                toDelete.forEach { deleteRecording($0) }
+                selectedIDs.removeAll()
+                isSelectMode = false
+            }
+            Button("delete.cancel_button", role: .cancel) {}
+        } message: {
+            Text("Dit kan niet ongedaan worden gemaakt.")
         }
     }
 
