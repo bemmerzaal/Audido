@@ -8,31 +8,14 @@ struct ActiveRecordingView: View {
     @State private var isStopping = false
 
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 28) {
             Spacer()
 
-            // Recording indicator
-            VStack(spacing: 16) {
-                Image(systemName: "record.circle")
-                    .font(.system(size: 64))
-                    .foregroundStyle(.red)
-                    .symbolEffect(.pulse, isActive: audioRecorder.isRecording)
+            WaveformPill(
+                level: audioRecorder.audioLevel,
+                duration: audioRecorder.currentDuration
+            )
 
-                Text("recording.recording")
-                    .font(.title2)
-                    .fontWeight(.medium)
-
-                Text(formatDuration(audioRecorder.currentDuration))
-                    .font(.system(size: 48, weight: .light, design: .monospaced))
-                    .foregroundStyle(.secondary)
-                    .contentTransition(.numericText())
-            }
-
-            // Audio level
-            AudioLevelIndicator(level: audioRecorder.audioLevel, barCount: 20)
-                .frame(width: 240, height: 20)
-
-            // Stop button — disabled while stopping to prevent double-click
             Button {
                 guard !isStopping else { return }
                 isStopping = true

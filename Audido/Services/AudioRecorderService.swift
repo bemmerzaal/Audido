@@ -71,7 +71,7 @@ final class AudioRecorderService {
                 var rms: Float = 0
                 let frames = vDSP_Length(buffer.frameLength)
                 vDSP_rmsqv(channelData, 1, &rms, frames)
-                let level = min(max(rms * 5, 0), 1)
+                let level = min(max(rms * 12, 0), 1)
                 DispatchQueue.main.async { [weak self] in
                     self?.audioLevel = level
                 }

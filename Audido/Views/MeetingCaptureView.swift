@@ -141,51 +141,14 @@ struct ActiveMeetingCaptureView: View {
     var onCaptureSaved: (Recording) -> Void
 
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 28) {
             Spacer()
 
-            // Capture indicator
-            VStack(spacing: 16) {
-                Image(systemName: "video.circle.fill")
-                    .font(.system(size: 64))
-                    .foregroundStyle(.blue)
-                    .symbolEffect(.pulse, isActive: true)
+            WaveformPill(
+                level: max(captureService.systemAudioLevel, captureService.micAudioLevel),
+                duration: captureService.currentDuration
+            )
 
-                Text("meeting.active")
-                    .font(.title2)
-                    .fontWeight(.medium)
-
-                Text(formatDuration(captureService.currentDuration))
-                    .font(.system(size: 48, weight: .light, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-
-            // Audio levels
-            VStack(spacing: 12) {
-                HStack(spacing: 8) {
-                    Image(systemName: "speaker.wave.2")
-                        .frame(width: 20)
-                    Text("meeting.system_label")
-                        .font(.caption)
-                        .frame(width: 44, alignment: .leading)
-                    AudioLevelIndicator(level: captureService.systemAudioLevel, barCount: 20)
-                        .frame(width: 240, height: 20)
-                }
-
-                if captureService.includeMicrophone {
-                    HStack(spacing: 8) {
-                        Image(systemName: "mic")
-                            .frame(width: 20)
-                        Text("meeting.mic_label")
-                            .font(.caption)
-                            .frame(width: 44, alignment: .leading)
-                        AudioLevelIndicator(level: captureService.micAudioLevel, barCount: 20)
-                            .frame(width: 240, height: 20)
-                    }
-                }
-            }
-
-            // Stop button
             Button {
                 Task { await stopCapture() }
             } label: {

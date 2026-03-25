@@ -463,6 +463,7 @@
       }
     },
     "meeting.active" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -575,6 +576,7 @@
       }
     },
     "meeting.mic_label" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -703,6 +705,7 @@
       }
     },
     "meeting.system_label" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
