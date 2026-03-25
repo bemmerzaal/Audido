@@ -150,9 +150,10 @@ final class PodcastService: NSObject {
 
     func pauseDownload() {
         downloadTask?.cancel(byProducingResumeData: { [weak self] data in
+            guard let self else { return }
             Task { @MainActor in
-                self?.resumeData = data
-                self?.isPaused = true
+                self.resumeData = data
+                self.isPaused = true
             }
         })
     }

@@ -113,7 +113,7 @@ final class ModelManager {
         errorMessage = nil
 
         do {
-            let folder = try await WhisperKit.download(
+            _ = try await WhisperKit.download(
                 variant: name,
                 downloadBase: Self.modelsBaseDirectory
             ) { [weak self] progress in

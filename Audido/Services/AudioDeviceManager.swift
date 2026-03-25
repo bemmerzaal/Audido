@@ -107,13 +107,13 @@ final class AudioDeviceManager {
             mElement: kAudioObjectPropertyElementMain
         )
 
-        var name: CFString = "" as CFString
-        var dataSize = UInt32(MemoryLayout<CFString>.size)
+        var namePtr: UnsafeRawPointer? = nil
+        var dataSize = UInt32(MemoryLayout<UnsafeRawPointer>.size)
 
-        let status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &dataSize, &name)
-        guard status == noErr else { return nil }
+        let status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &dataSize, &namePtr)
+        guard status == noErr, let rawPtr = namePtr else { return nil }
 
-        return name as String
+        return Unmanaged<CFString>.fromOpaque(rawPtr).takeRetainedValue() as String
     }
 
     private static func deviceUniqueID(for deviceID: AudioDeviceID) -> String? {
@@ -123,13 +123,13 @@ final class AudioDeviceManager {
             mElement: kAudioObjectPropertyElementMain
         )
 
-        var uid: CFString = "" as CFString
-        var dataSize = UInt32(MemoryLayout<CFString>.size)
+        var uidPtr: UnsafeRawPointer? = nil
+        var dataSize = UInt32(MemoryLayout<UnsafeRawPointer>.size)
 
-        let status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &dataSize, &uid)
-        guard status == noErr else { return nil }
+        let status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &dataSize, &uidPtr)
+        guard status == noErr, let rawPtr = uidPtr else { return nil }
 
-        return uid as String
+        return Unmanaged<CFString>.fromOpaque(rawPtr).takeRetainedValue() as String
     }
 
     // MARK: - Device Change Monitoring

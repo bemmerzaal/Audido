@@ -56,7 +56,7 @@ final class MeetingCaptureService: NSObject {
             filter = SCContentFilter(display: content.displays.first!, excludingApplications: excludedApps, exceptingWindows: [])
         } else if let app = selectedApp {
             // Capture specific app
-            let windows = content.windows.filter { $0.owningApplication?.bundleIdentifier == app.bundleIdentifier }
+            _ = content.windows.filter { $0.owningApplication?.bundleIdentifier == app.bundleIdentifier }
             filter = SCContentFilter(display: content.displays.first!, including: [app], exceptingWindows: [])
         } else {
             throw MeetingCaptureError.noAppSelected
