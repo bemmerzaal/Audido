@@ -221,6 +221,22 @@
         }
       }
     },
+    "home.not_transcribed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Transcribed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet getranscribeerd"
+          }
+        }
+      }
+    },
     "home.record" : {
       "localizations" : {
         "en" : {
@@ -237,6 +253,22 @@
         }
       }
     },
+    "home.recents" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recents"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recents"
+          }
+        }
+      }
+    },
     "home.recordings" : {
       "localizations" : {
         "en" : {
@@ -249,6 +281,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opnames"
+          }
+        }
+      }
+    },
+    "home.transcribed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getranscribeerd"
+          }
+        }
+      }
+    },
+    "home.transcribing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribing\u2026"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcriberen\u2026"
           }
         }
       }

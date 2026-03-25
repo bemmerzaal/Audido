@@ -151,7 +151,7 @@ struct RecordingRow: View {
                         .scaleEffect(0.6)
                 } else if !recording.transcriptionText.isEmpty {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.accentColor)
                         .font(.callout)
                 }
             }
