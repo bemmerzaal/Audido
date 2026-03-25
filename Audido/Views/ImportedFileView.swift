@@ -97,7 +97,7 @@ struct ImportedFileView: View {
                                 Task { await transcribe() }
                             } label: {
                                 Text("transcription.transcribe")
-                                    .audidoToolbarRedCapsule()
+                                    .audidoToolbarFilledCapsule(background: Color.accentColor)
                             }
                             .buttonStyle(.plain)
                         }

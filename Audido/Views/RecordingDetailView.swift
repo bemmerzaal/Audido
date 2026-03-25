@@ -48,7 +48,7 @@ struct RecordingDetailView: View {
                 // Playback controls
                 playbackBar
                     .padding()
-                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+                    .glassEffect(.regular.interactive(), in: Capsule())
                     .padding()
 
                 Divider()
@@ -84,7 +84,7 @@ struct RecordingDetailView: View {
                                     transcribe()
                                 } label: {
                                     Text("transcription.transcribe")
-                                        .audidoToolbarRedCapsule()
+                                        .audidoToolbarFilledCapsule(background: Color.accentColor)
                                 }
                                 .buttonStyle(.plain)
                             }
