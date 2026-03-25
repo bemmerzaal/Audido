@@ -55,6 +55,7 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 28)
                         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
 
@@ -75,6 +76,7 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 28)
                         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
@@ -89,6 +91,7 @@ struct HomeView: View {
                         ForEach(recentRecordings) { recording in
                             Button { onSelectRecording(recording) } label: {
                                 RecentRecordingTile(recording: recording)
+                                    .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                         }
