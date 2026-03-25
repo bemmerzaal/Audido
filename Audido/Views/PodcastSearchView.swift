@@ -59,6 +59,7 @@ struct PodcastSearchView: View {
                         onSelectPodcast(podcast)
                     } label: {
                         PodcastRow(podcast: podcast)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }

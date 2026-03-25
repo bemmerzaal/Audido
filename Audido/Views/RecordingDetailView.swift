@@ -83,6 +83,7 @@ struct RecordingDetailView: View {
                                     transcribe()
                                 }
                                 .buttonStyle(.borderedProminent)
+                                .buttonBorderShape(.capsule)
                             }
 
                             Text(speakerMode == .multi

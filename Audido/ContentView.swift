@@ -236,7 +236,9 @@ struct ContentView: View {
                     selection = .podcasts
                 })
             case .podcastEpisode(let podcast, let episode):
-                PodcastEpisodeDetailView(episode: episode, podcast: podcast)
+                PodcastEpisodeDetailView(episode: episode, podcast: podcast, onBack: {
+                    selection = .podcastDetail(podcast)
+                })
             case .importedFile(let url):
                 ImportedFileView(fileURL: url)
             case .meetingCapture:

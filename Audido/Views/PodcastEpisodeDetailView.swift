@@ -10,6 +10,7 @@ struct PodcastEpisodeDetailView: View {
     @Environment(\.modelContext) private var modelContext
     let episode: PodcastEpisode
     let podcast: Podcast
+    var onBack: () -> Void
 
     @State private var transcriptionText = ""
     @State private var isTranscribing = false
@@ -87,6 +88,7 @@ struct PodcastEpisodeDetailView: View {
                                 Task { await downloadAndTranscribe() }
                             }
                             .buttonStyle(.borderedProminent)
+                            .buttonBorderShape(.capsule)
                         }
                     } else {
                         Text("transcription.no_model")
@@ -98,6 +100,15 @@ struct PodcastEpisodeDetailView: View {
             }
         }
         .navigationTitle(episode.title)
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    onBack()
+                } label: {
+                    Label("podcast.back", systemImage: "chevron.left")
+                }
+            }
+        }
         .alert("error.title", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
             Button("error.ok") { errorMessage = nil }
         } message: {

@@ -97,6 +97,7 @@ struct ImportedFileView: View {
                                 Task { await transcribe() }
                             }
                             .buttonStyle(.borderedProminent)
+                            .buttonBorderShape(.capsule)
                         }
 
                         Text(speakerMode == .multi

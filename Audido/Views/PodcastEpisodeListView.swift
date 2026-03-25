@@ -22,6 +22,7 @@ struct PodcastEpisodeListView: View {
                     onSelectEpisode(episode)
                 } label: {
                     EpisodeRow(episode: episode)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
