@@ -21,12 +21,13 @@ struct ActiveRecordingView: View {
                 isStopping = true
                 stopRecording()
             } label: {
-                Label(isStopping ? LocalizedStringKey("recording.stopping") : LocalizedStringKey("recording.stop"), systemImage: "stop.circle.fill")
-                    .font(.title3)
+                HStack(spacing: 8) {
+                    Image(systemName: "stop.circle.fill")
+                    Text(isStopping ? LocalizedStringKey("recording.stopping") : LocalizedStringKey("recording.stop"))
+                }
+                .audidoToolbarRedCapsule()
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .controlSize(.large)
+            .buttonStyle(.plain)
             .disabled(isStopping)
 
             Spacer()

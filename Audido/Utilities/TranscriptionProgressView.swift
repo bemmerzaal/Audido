@@ -15,12 +15,16 @@ struct TranscriptionProgressView: View {
                     .foregroundStyle(.secondary)
                     .font(.caption)
 
-                Button(role: .destructive) {
+                Button {
                     queue.cancelTask(task)
                 } label: {
-                    Label("progress.cancel", systemImage: "xmark")
+                    HStack(spacing: 6) {
+                        Image(systemName: "xmark")
+                        Text("progress.cancel")
+                    }
+                    .audidoToolbarNeutralCapsule()
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
             }
         } else {
             VStack(spacing: 16) {

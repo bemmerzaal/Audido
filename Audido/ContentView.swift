@@ -46,11 +46,7 @@ struct ContentView: View {
                             Image(systemName: "record.circle")
                             Text("nav.new_recording")
                         }
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 9)
-                        .foregroundStyle(.white)
-                        .background(Color.red)
-                        .clipShape(Capsule())
+                        .audidoToolbarRedCapsule()
                     }
                     .buttonStyle(.plain)
                     .disabled(audioRecorder.isRecording || meetingCapture.isCapturing)
@@ -80,15 +76,7 @@ struct ContentView: View {
                             Image(systemName: "doc.badge.plus")
                             Text("nav.upload_audio")
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 9)
-                        .foregroundStyle(.primary)
-                        .background(Color(NSColor.windowBackgroundColor))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
-                        )
+                        .audidoToolbarOutlineCapsule()
                     }
                     .buttonStyle(.plain)
                     .help("nav.import_help")

@@ -75,12 +75,7 @@ struct RecordingsListView: View {
                         }
                     } label: {
                         Text(isSelectMode ? LocalizedStringKey("settings.done") : LocalizedStringKey("list.select"))
-                            .font(.callout)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 5)
-                            .background(Color(NSColor.controlBackgroundColor))
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(Color(NSColor.separatorColor), lineWidth: 1))
+                            .audidoToolbarNeutralCapsule()
                     }
                     .buttonStyle(.plain)
 
@@ -105,12 +100,7 @@ struct RecordingsListView: View {
                             Text(selectedIDs.count == filteredRecordings.count
                                  ? LocalizedStringKey("list.deselect_all")
                                  : LocalizedStringKey("list.select_all"))
-                                .font(.callout)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 5)
-                                .background(Color(NSColor.controlBackgroundColor))
-                                .clipShape(Capsule())
-                                .overlay(Capsule().stroke(Color(NSColor.separatorColor), lineWidth: 1))
+                                .audidoToolbarNeutralCapsule()
                         }
                         .buttonStyle(.plain)
                     }
@@ -137,8 +127,8 @@ struct RecordingsListView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, AudidoToolbarButtonMetrics.horizontalPadding)
+                        .padding(.vertical, AudidoToolbarButtonMetrics.verticalPadding)
                         .background(Color(NSColor.controlBackgroundColor))
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(Color(NSColor.separatorColor), lineWidth: 0.5))
@@ -236,20 +226,26 @@ struct RecordingsListView: View {
                     if isSelectMode {
                         Divider()
                         HStack {
-                            Text(selectedIDs.isEmpty
-                                ? "Niets geselecteerd"
-                                : "\(selectedIDs.count) geselecteerd")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
+                            Group {
+                                if selectedIDs.isEmpty {
+                                    Text("list.selection_empty")
+                                } else {
+                                    Text("list.selection_count \(selectedIDs.count)")
+                                }
+                            }
+                            .font(AudidoToolbarButtonMetrics.font)
+                            .foregroundStyle(.secondary)
                             Spacer()
-                            Button(role: .destructive) {
+                            Button {
                                 showBulkDeleteConfirm = true
                             } label: {
-                                Label("Verwijder \(selectedIDs.count)", systemImage: "trash")
+                                HStack(spacing: 6) {
+                                    Image(systemName: "trash")
+                                    Text("list.delete_with_count \(selectedIDs.count)")
+                                }
+                                .audidoToolbarRedCapsule()
                             }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.red)
-                            .controlSize(.small)
+                            .buttonStyle(.plain)
                             .disabled(selectedIDs.isEmpty)
                         }
                         .padding(.horizontal, 16)
@@ -297,7 +293,7 @@ struct RecordingsListView: View {
         }
         // Bulk delete confirmation
         .alert(
-            Text("\(selectedIDs.count) opnames verwijderen?"),
+            Text("list.bulk_delete_title \(selectedIDs.count)"),
             isPresented: $showBulkDeleteConfirm
         ) {
             Button("delete.confirm_button", role: .destructive) {
@@ -311,7 +307,7 @@ struct RecordingsListView: View {
             }
             Button("delete.cancel_button", role: .cancel) {}
         } message: {
-            Text("Dit kan niet ongedaan worden gemaakt.")
+            Text("list.bulk_delete_message")
         }
     }
 

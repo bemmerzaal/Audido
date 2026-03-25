@@ -84,11 +84,13 @@ struct PodcastEpisodeDetailView: View {
                             .pickerStyle(.menu)
                             .frame(width: 180)
 
-                            Button("podcast.download_transcribe") {
+                            Button {
                                 Task { await downloadAndTranscribe() }
+                            } label: {
+                                Text("podcast.download_transcribe")
+                                    .audidoToolbarRedCapsule()
                             }
-                            .buttonStyle(.borderedProminent)
-                            .buttonBorderShape(.capsule)
+                            .buttonStyle(.plain)
                         }
                     } else {
                         Text("transcription.no_model")
@@ -187,24 +189,36 @@ struct PodcastEpisodeDetailView: View {
                         Button {
                             podcastService.resumeDownload()
                         } label: {
-                            Label("podcast.resume", systemImage: "play.fill")
+                            HStack(spacing: 6) {
+                                Image(systemName: "play.fill")
+                                Text("podcast.resume")
+                            }
+                            .audidoToolbarNeutralCapsule()
                         }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.plain)
                     } else {
                         Button {
                             podcastService.pauseDownload()
                         } label: {
-                            Label("podcast.pause", systemImage: "pause.fill")
+                            HStack(spacing: 6) {
+                                Image(systemName: "pause.fill")
+                                Text("podcast.pause")
+                            }
+                            .audidoToolbarNeutralCapsule()
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.plain)
                     }
 
-                    Button(role: .destructive) {
+                    Button {
                         podcastService.cancelDownload()
                     } label: {
-                        Label("podcast.cancel_download", systemImage: "xmark")
+                        HStack(spacing: 6) {
+                            Image(systemName: "xmark")
+                            Text("podcast.cancel_download")
+                        }
+                        .audidoToolbarNeutralCapsule()
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
                 }
             }
         }

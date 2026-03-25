@@ -102,14 +102,17 @@ struct MeetingCaptureSetupView: View {
                     if isStarting {
                         ProgressView()
                             .controlSize(.small)
+                            .padding(.horizontal, AudidoToolbarButtonMetrics.horizontalPadding)
+                            .padding(.vertical, AudidoToolbarButtonMetrics.verticalPadding)
                     } else {
-                        Label("meeting.start_capture", systemImage: "record.circle")
-                            .font(.title3)
+                        HStack(spacing: 8) {
+                            Image(systemName: "record.circle")
+                            Text("meeting.start_capture")
+                        }
+                        .audidoToolbarFilledCapsule(background: .blue)
                     }
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue)
-                .controlSize(.large)
+                .buttonStyle(.plain)
                 .disabled(isStarting || (!captureService.captureAllSystemAudio && captureService.selectedApp == nil))
             }
             .padding(24)
@@ -152,12 +155,13 @@ struct ActiveMeetingCaptureView: View {
             Button {
                 Task { await stopCapture() }
             } label: {
-                Label("meeting.stop_capture", systemImage: "stop.circle.fill")
-                    .font(.title3)
+                HStack(spacing: 8) {
+                    Image(systemName: "stop.circle.fill")
+                    Text("meeting.stop_capture")
+                }
+                .audidoToolbarRedCapsule()
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .controlSize(.large)
+            .buttonStyle(.plain)
 
             Spacer()
         }

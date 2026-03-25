@@ -168,11 +168,13 @@ struct ModelRow: View {
             } else if model.isDownloaded {
                 HStack(spacing: 8) {
                     if !isSelected {
-                        Button(AppLocalization.string("settings.select", uiLanguage: uiLanguage)) {
+                        Button {
                             onSelect()
+                        } label: {
+                            Text(AppLocalization.string("settings.select", uiLanguage: uiLanguage))
+                                .audidoToolbarNeutralCapsule()
                         }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.small)
+                        .buttonStyle(.plain)
                     }
                     Button(role: .destructive) {
                         onDelete()
@@ -185,13 +187,13 @@ struct ModelRow: View {
                 Button {
                     onDownload()
                 } label: {
-                    Label {
-                        Text(AppLocalization.string("settings.download", uiLanguage: uiLanguage))
-                    } icon: {
+                    HStack(spacing: 6) {
                         Image(systemName: "arrow.down.circle")
+                        Text(AppLocalization.string("settings.download", uiLanguage: uiLanguage))
                     }
+                    .audidoToolbarNeutralCapsule()
                 }
-                .controlSize(.small)
+                .buttonStyle(.plain)
             }
         }
         .padding(.vertical, 2)

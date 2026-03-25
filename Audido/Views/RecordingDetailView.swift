@@ -80,11 +80,13 @@ struct RecordingDetailView: View {
                                 .pickerStyle(.menu)
                                 .frame(width: 180)
 
-                                Button("transcription.transcribe") {
+                                Button {
                                     transcribe()
+                                } label: {
+                                    Text("transcription.transcribe")
+                                        .audidoToolbarRedCapsule()
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .buttonBorderShape(.capsule)
+                                .buttonStyle(.plain)
                             }
 
                             Text(speakerMode == .multi
@@ -374,14 +376,14 @@ struct RecordingDetailView: View {
                             showUnavailableAlert = true
                         }
                     } label: {
-                        Label(recording.summaryText != nil ? "transcription.regenerate_summary" : "transcription.ai_summary",
-                              systemImage: "apple.intelligence")
-                            .frame(maxWidth: .infinity)
+                        HStack(spacing: 8) {
+                            Image(systemName: "apple.intelligence")
+                            Text(recording.summaryText != nil ? LocalizedStringKey("transcription.regenerate_summary") : LocalizedStringKey("transcription.ai_summary"))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .audidoToolbarFilledCapsule(background: .purple)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .buttonBorderShape(.capsule)
-                    .tint(.purple)
+                    .buttonStyle(.plain)
                     .disabled(isSummarizing)
 
                     Button {
@@ -400,14 +402,14 @@ struct RecordingDetailView: View {
                             showUnavailableAlert = true
                         }
                     } label: {
-                        Label(recording.actionItemsText != nil ? "transcription.regenerate_actions" : "transcription.action_items",
-                              systemImage: "checklist")
-                            .frame(maxWidth: .infinity)
+                        HStack(spacing: 8) {
+                            Image(systemName: "checklist")
+                            Text(recording.actionItemsText != nil ? LocalizedStringKey("transcription.regenerate_actions") : LocalizedStringKey("transcription.action_items"))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .audidoToolbarFilledCapsule(background: .orange)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .buttonBorderShape(.capsule)
-                    .tint(.orange)
+                    .buttonStyle(.plain)
                     .disabled(isExtractingActions)
                 }
 
@@ -446,30 +448,30 @@ struct RecordingDetailView: View {
                         copied = false
                     }
                 } label: {
-                    Label {
+                    HStack(spacing: 8) {
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
                         if copied {
                             Text("transcription.copied")
                         } else {
                             Text("transcription.copy_text")
                         }
-                    } icon: {
-                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
                     }
                     .frame(maxWidth: .infinity)
+                    .audidoToolbarNeutralCapsule()
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(.plain)
 
                 Button {
                     exportToFile()
                 } label: {
-                    Label("transcription.export_txt", systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity)
+                    HStack(spacing: 8) {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("transcription.export_txt")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .audidoToolbarNeutralCapsule()
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(.plain)
 
                 Divider()
 

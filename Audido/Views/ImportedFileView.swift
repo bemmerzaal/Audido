@@ -93,11 +93,13 @@ struct ImportedFileView: View {
                             .pickerStyle(.menu)
                             .frame(width: 180)
 
-                            Button("transcription.transcribe") {
+                            Button {
                                 Task { await transcribe() }
+                            } label: {
+                                Text("transcription.transcribe")
+                                    .audidoToolbarRedCapsule()
                             }
-                            .buttonStyle(.borderedProminent)
-                            .buttonBorderShape(.capsule)
+                            .buttonStyle(.plain)
                         }
 
                         Text(speakerMode == .multi

@@ -68,12 +68,14 @@ struct RecordingQuickLookPanel: View {
 
                     // Open full view button — always visible at bottom
                     Button(action: onOpenFull) {
-                        Label("quicklook.open_full", systemImage: "arrow.up.right.square")
-                            .frame(maxWidth: .infinity)
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.up.right.square")
+                            Text("quicklook.open_full")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .audidoToolbarNeutralCapsule()
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                    .buttonBorderShape(.capsule)
+                    .buttonStyle(.plain)
                     .padding()
                 }
             }

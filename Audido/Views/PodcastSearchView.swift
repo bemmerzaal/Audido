@@ -31,8 +31,8 @@ struct PodcastSearchView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.horizontal, AudidoToolbarButtonMetrics.horizontalPadding)
+                .padding(.vertical, AudidoToolbarButtonMetrics.verticalPadding)
                 .background(Color(NSColor.controlBackgroundColor))
                 .clipShape(Capsule())
                 .overlay(
