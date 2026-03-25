@@ -173,7 +173,7 @@ struct RecordingsListView: View {
                                                 .foregroundStyle(isChecked ? Color.accentColor : Color.secondary)
                                                 .transition(.scale.combined(with: .opacity))
                                         }
-                                        RecordingRow(recording: recording)
+                                        RecordingRow(recording: recording, searchText: searchText)
                                     }
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 12)
