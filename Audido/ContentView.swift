@@ -10,7 +10,9 @@ enum SidebarItem: Hashable {
     case podcastDetail(Podcast)
     case podcastEpisode(Podcast, PodcastEpisode)
     case importedFile(URL)
+    #if !APPSTORE
     case meetingCapture
+    #endif
 }
 
 struct ContentView: View {
@@ -19,7 +21,9 @@ struct ContentView: View {
     @Environment(ModelManager.self) private var modelManager
     @Environment(PodcastService.self) private var podcastService
     @Environment(AudioDeviceManager.self) private var audioDeviceManager
+    #if !APPSTORE
     @Environment(MeetingCaptureService.self) private var meetingCapture
+    #endif
     @Environment(\.modelContext) private var modelContext
     @State private var selection: SidebarItem? = .home
     @State private var showModelManagement = false
@@ -40,7 +44,11 @@ struct ContentView: View {
             ToolbarItem(placement: .principal) {
                 HStack(spacing: 10) {
                     Button {
+                        #if APPSTORE
+                        startRecording()
+                        #else
                         showRecordModePopover = true
+                        #endif
                     } label: {
                         HStack(spacing: 5) {
                             Image(systemName: "record.circle")
@@ -49,6 +57,10 @@ struct ContentView: View {
                         .audidoToolbarRedCapsule()
                     }
                     .buttonStyle(.plain)
+                    #if APPSTORE
+                    .disabled(audioRecorder.isRecording)
+                    .opacity(audioRecorder.isRecording ? 0.6 : 1)
+                    #else
                     .disabled(audioRecorder.isRecording || meetingCapture.isCapturing)
                     .opacity(audioRecorder.isRecording || meetingCapture.isCapturing ? 0.6 : 1)
                     .popover(isPresented: $showRecordModePopover, arrowEdge: .bottom) {
@@ -68,6 +80,7 @@ struct ContentView: View {
                             Label("sidebar.meeting_capture", systemImage: "video.circle.fill")
                         }
                     }
+                    #endif
 
                     Button {
                         showFileImporter = true
@@ -127,6 +140,7 @@ struct ContentView: View {
         }
     }
 
+    #if !APPSTORE
     // MARK: - Recording mode popover
 
     private var recordModePopover: some View {
@@ -184,22 +198,38 @@ struct ContentView: View {
         .padding()
         .frame(width: 300)
     }
+    #endif
 
     // MARK: - Detail content
 
     @ViewBuilder
     private var detailContent: some View {
+        #if APPSTORE
+        let isCapturingMeeting = false
+        #else
+        let isCapturingMeeting = meetingCapture.isCapturing
+        #endif
+
         if audioRecorder.isRecording {
             ActiveRecordingView(onRecordingSaved: { recording in
                 selection = .recording(recording)
             })
-        } else if meetingCapture.isCapturing {
+        } else if isCapturingMeeting {
+            #if !APPSTORE
             ActiveMeetingCaptureView(onCaptureSaved: { recording in
                 selection = .recording(recording)
             })
+            #endif
         } else {
             switch selection {
             case .home, .none:
+                #if APPSTORE
+                HomeView(onStartRecording: {
+                    startRecording()
+                }, onSelectRecording: { recording in
+                    selection = .recording(recording)
+                })
+                #else
                 HomeView(onStartRecording: {
                     startRecording()
                 }, onSelectRecording: { recording in
@@ -207,6 +237,7 @@ struct ContentView: View {
                 }, onStartMeetingCapture: {
                     selection = .meetingCapture
                 })
+                #endif
             case .allItems:
                 RecordingsListView(onSelectRecording: { recording in
                     selection = .recording(recording)
@@ -231,10 +262,12 @@ struct ContentView: View {
                 })
             case .importedFile(let url):
                 ImportedFileView(fileURL: url)
+            #if !APPSTORE
             case .meetingCapture:
                 MeetingCaptureSetupView(onCaptureSaved: { recording in
                     selection = .recording(recording)
                 })
+            #endif
             }
         }
     }

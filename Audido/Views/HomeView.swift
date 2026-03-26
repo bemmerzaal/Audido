@@ -6,7 +6,9 @@ struct HomeView: View {
     @Environment(ModelManager.self) private var modelManager
     var onStartRecording: () -> Void
     var onSelectRecording: (Recording) -> Void
+    #if !APPSTORE
     var onStartMeetingCapture: () -> Void
+    #endif
 
     private var transcriptionCount: Int {
         recordings.filter { !$0.transcriptionText.isEmpty }.count
@@ -59,6 +61,7 @@ struct HomeView: View {
                     }
                     .buttonStyle(.plain)
 
+                    #if !APPSTORE
                     // Meeting Capture
                     Button(action: onStartMeetingCapture) {
                         VStack(spacing: 12) {
@@ -79,6 +82,7 @@ struct HomeView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    #endif
                 }
 
                 // Recents

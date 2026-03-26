@@ -1,3 +1,21 @@
+#if APPSTORE
+
+import Foundation
+import Observation
+
+@Observable
+final class MeetingCaptureService: NSObject {
+    var isCapturing = false
+    var currentDuration: TimeInterval = 0.0
+    var systemAudioLevel: Float = 0.0
+    var micAudioLevel: Float = 0.0
+    var errorMessage: String?
+    private(set) var outputURL: URL?
+    var currentFileName: String?
+}
+
+#else
+
 import AVFoundation
 import ScreenCaptureKit
 import Observation
@@ -397,3 +415,5 @@ enum MeetingCaptureError: LocalizedError {
         }
     }
 }
+
+#endif

@@ -142,6 +142,7 @@
       }
     },
     "home.capture_system_audio" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -158,6 +159,7 @@
       }
     },
     "home.meeting" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -237,22 +239,6 @@
         }
       }
     },
-    "home.record" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opnemen"
-          }
-        }
-      }
-    },
     "home.recents" : {
       "localizations" : {
         "en" : {
@@ -265,6 +251,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recents"
+          }
+        }
+      }
+    },
+    "home.record" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnemen"
           }
         }
       }
@@ -306,13 +308,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcribing\u2026"
+            "value" : "Transcribing…"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcriberen\u2026"
+            "value" : "Transcriberen…"
           }
         }
       }
@@ -672,6 +674,7 @@
       }
     },
     "meeting.all_system_audio" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -688,6 +691,7 @@
       }
     },
     "meeting.application" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -704,6 +708,7 @@
       }
     },
     "meeting.audio_source" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -720,6 +725,7 @@
       }
     },
     "meeting.include_microphone" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -736,6 +742,7 @@
       }
     },
     "meeting.loading_apps" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -752,6 +759,7 @@
       }
     },
     "meeting.mic_hint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -785,6 +793,7 @@
       }
     },
     "meeting.microphone" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -801,6 +810,7 @@
       }
     },
     "meeting.select_app" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -817,6 +827,7 @@
       }
     },
     "meeting.source" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -833,6 +844,7 @@
       }
     },
     "meeting.specific_app" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -849,6 +861,7 @@
       }
     },
     "meeting.start_capture" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -865,6 +878,7 @@
       }
     },
     "meeting.stop_capture" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -881,6 +895,7 @@
       }
     },
     "meeting.subtitle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -914,6 +929,7 @@
       }
     },
     "meeting.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -930,6 +946,7 @@
       }
     },
     "meeting.title_prefix" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -946,6 +963,7 @@
       }
     },
     "nav.choose_mode" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -978,6 +996,7 @@
       }
     },
     "nav.meeting_subtitle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -994,6 +1013,7 @@
       }
     },
     "nav.microphone" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1010,6 +1030,7 @@
       }
     },
     "nav.microphone_subtitle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2021,6 +2042,7 @@
       }
     },
     "sidebar.meeting_capture" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

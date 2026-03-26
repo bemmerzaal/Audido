@@ -1,3 +1,5 @@
+#if !APPSTORE
+
 import SwiftUI
 import SwiftData
 import ScreenCaptureKit
@@ -183,3 +185,5 @@ struct ActiveMeetingCaptureView: View {
         onCaptureSaved(recording)
     }
 }
+
+#endif
