@@ -12,10 +12,19 @@ enum AppLocalization {
     }
 
     static func string(_ key: String, uiLanguage: String) -> String {
-        String(
-            localized: String.LocalizationValue(stringLiteral: key),
-            bundle: .main,
-            locale: locale(forUiLanguage: uiLanguage)
-        )
+        let bundle = bundle(forUiLanguage: uiLanguage)
+        return NSLocalizedString(key, bundle: bundle, comment: "")
+    }
+
+    private static var bundleCache: [String: Bundle] = [:]
+
+    private static func bundle(forUiLanguage code: String) -> Bundle {
+        if let cached = bundleCache[code] { return cached }
+        if let path = Bundle.main.path(forResource: code, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            bundleCache[code] = bundle
+            return bundle
+        }
+        return .main
     }
 }
